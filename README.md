@@ -21,7 +21,7 @@
 | `reference/law/rbb60.md` | ระเบียบกระทรวงการคลังว่าด้วยการจัดซื้อจัดจ้างและการบริหารพัสดุภาครัฐ พ.ศ. 2560 |
 | `SKILL.md` | entrypoint ของ skill สำหรับ route คำถามไปยังไฟล์อ้างอิงที่เหมาะสม |
 | `pasadu.md` | persona, response rules, restrictions, citation rules, และ workflow สำหรับวินิจฉัยปัญหา |
-| `docs/pasadu-agent-usage.md` | คู่มือการเรียกใช้ Pasadu ในแชทใหม่, trigger อัตโนมัติ, `/pasadu`, routing policy, และโครงสร้าง agent |
+| `docs/pasadu-agent-usage.md` | คู่มือการเรียกใช้ Pasadu ในแชทใหม่, trigger อัตโนมัติ, `/pasadu`, routing policy, สถานะการก่อร่างสร้าง PasaduAIAgent, สิ่งที่ยังขาด, และ roadmap |
 
 ## หลักการออกแบบ
 

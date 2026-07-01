@@ -33,6 +33,335 @@ Pasadu มีส่วนประกอบหลัก 4 ชั้น:
   -> ตอบพร้อม citation ที่ตรวจสอบได้
 ```
 
+## สถานะการก่อร่างสร้าง PasaduAIAgent
+
+PasaduAIAgent ตอนนี้ยังอยู่ในช่วงวางฐานของ agent ไม่ใช่ production chatbot เต็มรูปแบบ แต่มีแกนสำคัญครบพอสำหรับทดลองตอบคำถามจาก พ.ร.บ. และระเบียบแบบมี citation แล้ว
+
+สถานะปัจจุบัน:
+
+| ส่วน | สถานะ | หมายเหตุ |
+| --- | --- | --- |
+| กฎหมายหลัก `prb60.md` | มีแล้ว | ใช้เป็นฐาน พ.ร.บ. จัดซื้อจัดจ้างฯ 2560 |
+| ระเบียบหลัก `rbb60.md` | มีแล้ว | ใช้เป็นฐานระเบียบกระทรวงการคลังฯ 2560 |
+| persona/rules `pasadu.md` | มีแล้ว | เป็น runtime policy หลักที่ answer context ใช้จริง |
+| skill entrypoint `SKILL.md` | มีแล้ว | ใช้ trigger skill และบอก routing guidance ให้ agent |
+| retrieval scripts | มีเวอร์ชันแรกแล้ว | route, retrieve, build context, cite check, eval |
+| section-aware index | มีแล้ว | แตก `มาตรา` และ `ข้อ` เป็น chunks ใน `data/index/` |
+| smoke tests | มีแล้ว | ใช้ `unittest` ตรวจ routing/retrieval/citation ขั้นต้น |
+| docs | เริ่มมีแล้ว | เอกสารนี้เป็นคู่มือการใช้และสถานะโครงการ |
+| chatbot runtime เต็มรูปแบบ | ยังไม่มี | ยังไม่มี web/API service หรือ chat UI เฉพาะของโปรเจกต์ |
+| reference ประเภทอื่น | ยังไม่ครบ | รอเพิ่มหนังสือเวียน คู่มือ คำวินิจฉัย FAQ ตัวอย่างเอกสาร checklist |
+| evaluation set จริงจัง | ยังไม่ครบ | ตอนนี้มี smoke eval ยังไม่ใช่ชุด benchmark เชิงกฎหมาย/พัสดุเต็มรูปแบบ |
+
+## ทำถึงไหนแล้ว
+
+### 1. วางแหล่งอ้างอิงหลักแล้ว
+
+ตอนนี้ repo มี reference หลัก 2 ไฟล์:
+
+```text
+reference/law/prb60.md
+reference/law/rbb60.md
+```
+
+สองไฟล์นี้เป็นฐานคำตอบเชิงตัวบทในปัจจุบัน ทุกคำตอบด้านกฎหมายต้องอ้างกลับไปยังไฟล์เหล่านี้พร้อมเลขมาตราหรือเลขข้อ
+
+### 2. วางกฎ persona และ response policy แล้ว
+
+`pasadu.md` ทำหน้าที่กำหนดว่า agent ต้องตอบแบบผู้ช่วยงานพัสดุที่รอบคอบ:
+
+- ตอบสั้นพอใช้งาน
+- ชัดพอให้เจ้าหน้าที่ทำงานต่อ
+- แยกข้อเท็จจริงออกจากข้อกฎหมาย
+- อ้างอิงตัวบทเสมอ
+- ถ้าข้อมูลไม่พอให้ถามกลับ
+- ถ้าไม่พบใน reference ให้บอกว่าไม่พบ ไม่เดา
+
+หลังจากปรับล่าสุด `pasadu.md` ยังระบุ routing policy ให้ตรงกับ `SKILL.md` และ `scripts/pasadu/` ด้วย
+
+### 3. วาง skill trigger แล้ว
+
+`SKILL.md` ทำให้ agent รู้ว่าเมื่อไรควรใช้ Pasadu เช่น เมื่อผู้ใช้พูดถึง:
+
+- การจัดซื้อจัดจ้าง
+- พัสดุภาครัฐ
+- พรบ. / พ.ร.บ. / พระราชบัญญัติ
+- ระเบียบ / มาตรา / ข้อ
+- วิธีจัดซื้อจัดจ้าง
+- สัญญา / หลักประกัน / ตรวจรับ
+- อำนาจอนุมัติ / ร้องเรียน
+
+จุดนี้ทำให้ผู้ใช้ไม่จำเป็นต้องพิมพ์ `/pasadu` ทุกครั้ง ถ้าคำถามมีบริบทชัดพอ
+
+### 4. สร้าง retrieval layer เวอร์ชันแรกแล้ว
+
+สคริปต์ใน `scripts/pasadu/` ทำหน้าที่ให้ agent ไม่ต้องอ่านกฎหมายทั้งเล่มทุกครั้ง:
+
+```text
+scripts/pasadu/build_index.py
+scripts/pasadu/route_query.py
+scripts/pasadu/retrieve.py
+scripts/pasadu/answer_context.py
+scripts/pasadu/cite_check.py
+scripts/pasadu/eval_queries.py
+```
+
+แนวคิดคือ:
+
+```text
+route ก่อน retrieve
+retrieve เฉพาะมาตรา/ข้อที่เกี่ยวข้อง
+ตอบพร้อม citation
+ตรวจ citation ว่ามีจริง
+```
+
+### 5. มี index สำหรับค้นมาตรา/ข้อแล้ว
+
+`build_index.py` แตก `prb60.md` และ `rbb60.md` เป็น chunks ตามหน่วยตัวบท เช่น:
+
+```text
+reference/law/prb60.md มาตรา 56
+reference/law/rbb60.md ข้อ 78
+```
+
+ผลลัพธ์ถูกเก็บใน:
+
+```text
+data/index/chunks.json
+data/index/documents.json
+data/index/keyword_routes.json
+data/index/topic_routes.json
+```
+
+ข้อดีคือ agent สามารถค้นเฉพาะช่วงที่เกี่ยวข้อง ไม่ต้องยัด พ.ร.บ. หรือระเบียบทั้งเล่มเข้า context
+
+### 6. มี smoke tests แล้ว
+
+ตอนนี้มี tests ที่ตรวจว่า:
+
+- คำถาม `มาตรา 56` route ไป `prb60.md`
+- คำถามวิธีเฉพาะเจาะจง route ไป `rbb60.md`
+- คำถามกลุ่มแก้ไขสัญญาเริ่มจาก `prb60.md`
+- citation ที่มีจริงผ่าน
+- citation ที่ไม่มีจริงไม่ผ่าน
+
+รันด้วย:
+
+```powershell
+python -m unittest discover -s tests
+```
+
+## ยังขาดอะไร
+
+### 1. ยังไม่มี chatbot runtime เต็มรูปแบบ
+
+ตอนนี้ repo เป็นฐานของ agent และ retrieval system แต่ยังไม่มี:
+
+- web app
+- API service
+- chat UI
+- session memory
+- user authentication
+- deployment config
+- logging/observability สำหรับการตอบคำถามจริง
+
+กล่าวอีกแบบ: ตอนนี้มี “สมองด้าน rule + reference + retrieval” แต่ยังไม่มี “ตัวแอป chatbot” เต็มตัว
+
+### 2. ยังไม่มี reference ประเภทเสริมครบ
+
+ตอนนี้ตอบได้ดีขึ้นจาก พ.ร.บ. และระเบียบ แต่คำถามเชิงปฏิบัติจำนวนมากจะต้องใช้เอกสารเสริม เช่น:
+
+- หนังสือเวียน
+- คู่มือ e-GP/ECPP
+- คำวินิจฉัย
+- FAQ
+- ตัวอย่างเอกสาร
+- checklist
+
+เอกสารเหล่านี้ยังต้องเพิ่มอย่างเป็นระบบ และต้องระบุ metadata ให้ชัดว่าเป็น reference ประเภทใด มี authority ระดับไหน และควรใช้เมื่อไร
+
+### 3. ยังไม่มี schema สำหรับ reference ใหม่
+
+ควรกำหนดรูปแบบ metadata มาตรฐาน เช่น:
+
+```yaml
+title:
+short_title:
+doc_type:
+authority_level:
+source_agency:
+published_date:
+effective_date:
+status:
+topics:
+supersedes:
+related_law:
+```
+
+ถ้าไม่มี schema นี้ เมื่อ reference เยอะขึ้น retrieval จะเริ่มสับสนว่าเอกสารไหนใหม่กว่า สูงกว่า หรือเกี่ยวกับเรื่องใด
+
+### 4. ยังไม่มี ranking/authority resolver
+
+ในอนาคต ถ้าคำถามชนกันระหว่าง:
+
+- พ.ร.บ.
+- ระเบียบ
+- หนังสือเวียน
+- คู่มือ
+- คำวินิจฉัย
+- FAQ
+- checklist
+
+ระบบต้องมี logic จัดลำดับว่าเอกสารไหนเป็นฐานอำนาจ เอกสารไหนเป็นแนวปฏิบัติ และเอกสารไหนเป็นเพียงตัวช่วย
+
+ตอนนี้กฎตั้งต้นคือ:
+
+- operational questions เริ่มที่ระเบียบ
+- กลุ่มบริหาร/แก้ไข/เลิกสัญญาเริ่มที่ พ.ร.บ.
+- เอกสารเสริมในอนาคตเป็น supporting guidance ไม่ใช่ authority สูงกว่า พ.ร.บ./ระเบียบ
+
+แต่ยังต้องทำให้เป็น structured policy ใน code เมื่อ reference เพิ่มจริง
+
+### 5. ยังไม่มี evaluation set ที่ครอบคลุมงานพัสดุจริง
+
+ตอนนี้มี smoke eval เพื่อตรวจว่า script ไม่พัง แต่ยังไม่มีชุดคำถามที่ครอบคลุม เช่น:
+
+- วิธีจัดซื้อจัดจ้าง
+- TOR/spec
+- ราคากลาง
+- e-bidding
+- วิธีเฉพาะเจาะจง
+- สัญญาและหลักประกัน
+- ตรวจรับ
+- ค่าปรับ
+- แก้ไขสัญญา
+- บอกเลิกสัญญา
+- อุทธรณ์/ร้องเรียน
+- งานก่อสร้าง
+- จ้างที่ปรึกษา
+- จ้างออกแบบหรือควบคุมงาน
+
+ควรมี expected citation และ expected behavior สำหรับแต่ละกรณี
+
+### 6. ยังไม่มี answer quality checker
+
+ตอนนี้มี `cite_check.py` ตรวจว่า citation มีจริง แต่ยังไม่ได้ตรวจว่า:
+
+- คำตอบใช้ citation ถูกบริบทหรือไม่
+- สรุปเกินตัวบทหรือไม่
+- มี hallucination ในส่วนวินิจฉัยหรือไม่
+- ถามกลับเมื่อข้อมูลไม่พอจริงหรือไม่
+- แยกตัวบท/วินิจฉัย/ข้อควรตรวจเพิ่มถูกหรือไม่
+
+ในอนาคตควรมี evaluator อีกชั้นสำหรับคุณภาพคำตอบ
+
+## รอจะเพิ่มอะไรลงไป
+
+### Reference ที่ควรเพิ่ม
+
+ลำดับที่ควรเพิ่มต่อ:
+
+1. หนังสือเวียนสำคัญของกรมบัญชีกลาง/กระทรวงการคลัง
+2. คู่มือ e-GP หรือ ECPP ที่ใช้ตอบขั้นตอนระบบ
+3. คำวินิจฉัยหรือแนววินิจฉัยที่เจอบ่อย
+4. FAQ จากหน่วยงานที่เชื่อถือได้
+5. ตัวอย่างเอกสาร เช่น TOR, รายงานขอซื้อขอจ้าง, แต่งตั้งคณะกรรมการ, ตรวจรับ
+6. checklist สำหรับเจ้าหน้าที่ เช่น checklist ก่อนประกาศ, ก่อนทำสัญญา, ก่อนตรวจรับ
+
+ทุก reference ใหม่ควรแปลงเป็น Markdown พร้อม metadata ก่อนเข้า index
+
+### Script ที่ควรเพิ่ม/ปรับ
+
+สิ่งที่ควรทำต่อใน `scripts/pasadu/`:
+
+- รองรับ reference หลายประเภท ไม่ใช่แค่ `reference/law/`
+- เพิ่ม metadata parser สำหรับหนังสือเวียน คู่มือ คำวินิจฉัย FAQ และ checklist
+- เพิ่ม authority/ranking logic
+- เพิ่ม freshness/status check เช่น active, superseded, draft
+- เพิ่ม command สำหรับ re-index เฉพาะไฟล์ที่เปลี่ยน
+- เพิ่ม report ว่าแต่ละ topic มี reference ครบหรือยัง
+- เพิ่ม answer evaluator ที่เช็กว่าไม่ได้สรุปเกินตัวบท
+
+### Docs ที่ควรเพิ่ม
+
+เอกสารที่ควรมีต่อ:
+
+- `docs/reference-ingestion.md`: วิธีเพิ่ม reference ใหม่
+- `docs/routing-policy.md`: routing/authority policy แบบละเอียด
+- `docs/evaluation-plan.md`: แผนสร้างชุดทดสอบ
+- `docs/answer-style.md`: ตัวอย่างคำตอบที่ดี/ไม่ดี
+- `docs/roadmap.md`: roadmap ของ PasaduAIAgent
+
+## Roadmap ที่แนะนำ
+
+### Phase 1: Stabilize core retrieval
+
+สถานะ: ทำไปแล้วบางส่วน
+
+เป้าหมาย:
+
+- ใช้ `prb60.md` และ `rbb60.md` ได้มั่นคง
+- route ถูกไฟล์
+- retrieve ถูกมาตรา/ข้อ
+- citation ตรวจได้
+- policy ใน `SKILL.md` และ `pasadu.md` สอดคล้องกัน
+
+สิ่งที่ยังควรทำใน Phase 1:
+
+- เพิ่ม eval cases ให้ครอบคลุมหัวข้อหลัก
+- เพิ่ม README สำหรับ scripts โดยเฉพาะ
+- เพิ่มตัวอย่างคำถาม/คำตอบ canonical
+
+### Phase 2: Add practical references
+
+เป้าหมาย:
+
+- เพิ่มหนังสือเวียน คู่มือ e-GP/ECPP คำวินิจฉัย FAQ checklist
+- ใส่ metadata ทุกไฟล์
+- ปรับ `build_index.py` ให้รู้จัก reference types ใหม่
+- ปรับ `route_query.py` ให้เลือกเอกสารเสริมตาม intent
+
+ข้อควรระวัง:
+
+- อย่าให้คู่มือหรือ FAQ ทับตัวบท
+- ต้องแยก “ฐานอำนาจ” กับ “แนวปฏิบัติ” ให้ชัด
+
+### Phase 3: Build chatbot runtime
+
+เป้าหมาย:
+
+- สร้าง API หรือ chat interface
+- ต่อ retrieval scripts เข้ากับ LLM runtime
+- เพิ่ม citation checker หลัง generate
+- เก็บ logs ของ query, retrieved chunks, final answer, citation status
+- รองรับ mode คำตอบ เช่น ตัวบทเท่านั้น / เชิงปฏิบัติ / checklist
+
+### Phase 4: Evaluation and trust
+
+เป้าหมาย:
+
+- สร้าง evaluation set จริงจัง
+- วัด citation accuracy
+- วัด routing accuracy
+- วัด hallucination rate
+- ตรวจคำตอบโดยผู้รู้ด้านพัสดุ
+- เพิ่ม regression tests ก่อนเพิ่ม reference ใหม่ทุกครั้ง
+
+## Definition of Done สำหรับ PasaduAIAgent
+
+PasaduAIAgent ควรถือว่า “ใช้งานจริงได้ระดับหนึ่ง” เมื่อทำได้ครบอย่างน้อย:
+
+1. รับคำถามพัสดุทั่วไปได้โดยไม่ต้องพิมพ์ `/pasadu` ทุกครั้ง
+2. route ไป reference ที่ถูกต้อง
+3. retrieve มาตรา/ข้อที่เกี่ยวข้องโดยไม่อ่านทั้งเล่ม
+4. ตอบพร้อม citation ที่ตรวจสอบได้
+5. ถ้าข้อมูลไม่พอ ถามกลับแทนการเดา
+6. ถ้าไม่พบ reference บอกว่าไม่พบ
+7. แยกตัวบท วินิจฉัย และข้อควรตรวจเพิ่มได้
+8. รองรับ reference เสริมโดยไม่ทำให้ authority สับสน
+9. มี eval set พอจับ regression
+10. มี workflow สำหรับเพิ่ม reference ใหม่อย่างเป็นระบบ
+
 ## ต้องใช้ `/pasadu` ทุกครั้งไหม
 
 ไม่ต้องใช้ทุกครั้ง
