@@ -1,0 +1,15 @@
+- id: rbb-specific-method
+  question: วิธีเฉพาะเจาะจงใช้กรณีใด
+  expected_source: reference/law/rbb60.md
+
+- id: prb-section-56
+  question: มาตรา 56 กล่าวถึงอะไร
+  expected_source: reference/law/prb60.md
+
+- id: rbb-inspection
+  question: คณะกรรมการตรวจรับพัสดุต้องดูจากข้อไหน
+  expected_source: reference/law/rbb60.md
+
+- id: prb-appeal
+  question: การอุทธรณ์อยู่ใน พรบ มาตราใด
+  expected_source: reference/law/prb60.md

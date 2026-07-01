@@ -1,0 +1,44 @@
+[
+  {
+    "source": "reference/law/prb60.md",
+    "doc_type": "act",
+    "metadata": {
+      "title": "พระราชบัญญัติการจัดซื้อจัดจ้างและการบริหารพัสดุภาครัฐ พ.ศ. 2560",
+      "short_title": "พรบ.จัดซื้อจัดจ้าง 2560",
+      "type": "พระราชบัญญัติ",
+      "year": "2560",
+      "published_in": "ราชกิจจานุเบกษา",
+      "published_date": "24 กุมภาพันธ์ 2560",
+      "volume": "134",
+      "section": "24 ก",
+      "page_start": "13",
+      "status": "active",
+      "language": "th",
+      "canonical": "true",
+      "source_quality": "official",
+      "encoding": "UTF-8"
+    },
+    "chunk_count": 132
+  },
+  {
+    "source": "reference/law/rbb60.md",
+    "doc_type": "regulation",
+    "metadata": {
+      "title": "ระเบียบกระทรวงการคลังว่าด้วยการจัดซื้อจัดจ้างและการบริหารพัสดุภาครัฐ พ.ศ. 2560",
+      "short_title": "ระเบียบจัดซื้อจัดจ้าง 2560",
+      "type": "ระเบียบ",
+      "year": "2560",
+      "published_in": "ราชกิจจานุเบกษา",
+      "published_date": "23 สิงหาคม 2560",
+      "volume": "134",
+      "section": "ตอนพิเศษ 210 ง",
+      "page_start": "1",
+      "status": "active",
+      "language": "th",
+      "canonical": "true",
+      "source_quality": "official",
+      "encoding": "UTF-8"
+    },
+    "chunk_count": 223
+  }
+]

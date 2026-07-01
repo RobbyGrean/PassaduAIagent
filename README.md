@@ -81,3 +81,38 @@ PassaduAIagent/
 - สร้างชุดคำถามทดสอบสำหรับ procurement QA
 - เพิ่มตัวอย่างคำถามและคำตอบที่ดี
 - ทดลองทำ agent runtime ที่ใช้ `SKILL.md` และ `pasadu.md` เป็นฐาน
+
+## Retrieval scripts
+
+สคริปต์ชุดแรกอยู่ใน `scripts/pasadu/` และยังใช้เฉพาะ reference หลัก 2 ไฟล์:
+
+- `reference/law/prb60.md`
+- `reference/law/rbb60.md`
+
+ลำดับใช้งาน:
+
+```powershell
+python scripts\pasadu\build_index.py
+python scripts\pasadu\route_query.py "มาตรา 56 กล่าวถึงอะไร"
+python scripts\pasadu\retrieve.py "วิธีเฉพาะเจาะจงใช้กรณีใด" --limit 5
+python scripts\pasadu\answer_context.py "คณะกรรมการตรวจรับพัสดุต้องดูจากข้อไหน"
+python scripts\pasadu\cite_check.py --text "อ้างอิง: reference/law/prb60.md มาตรา 56"
+python scripts\pasadu\eval_queries.py
+```
+
+หน้าที่หลัก:
+
+- `build_index.py` แตกไฟล์กฎหมายเป็น chunks ตาม `มาตรา` และ `ข้อ`
+- `route_query.py` เลือกว่าจะค้น `prb60.md`, `rbb60.md`, หรือทั้งสองไฟล์
+- `retrieve.py` คืนตัวบทที่เกี่ยวข้องพร้อม citation
+- `answer_context.py` รวม `pasadu.md` + คำถาม + ตัวบทที่ค้นเจอ เพื่อส่งต่อให้ chatbot
+- `cite_check.py` ตรวจว่า citation ที่ AI ตอบมีอยู่จริงใน index
+- `eval_queries.py` รัน smoke eval สำหรับ routing/retrieval
+
+### Routing policy ปัจจุบัน
+
+- ถ้าผู้ใช้ถามเจาะ `มาตรา`, `พรบ.`, `พ.ร.บ.`, หรือ `พระราชบัญญัติ` ให้ค้น `prb60.md` ก่อน และ fallback ไป `rbb60.md` เมื่อไม่พบ
+- ถ้าผู้ใช้ถามเจาะ `ข้อ` หรือ `ระเบียบ` ให้ค้น `rbb60.md` ก่อน และ fallback ไป `prb60.md` เมื่อไม่พบ
+- ถ้าคำถามทั่วไปไม่ได้เจาะแหล่งอ้างอิง ให้ค้น `rbb60.md` ก่อน เพราะการปฏิบัติงานยึดระเบียบเป็นหลัก แล้วใช้ `prb60.md` ประกอบเมื่อจำเป็น
+- ยกเว้นกลุ่มบริหารสัญญา เช่น บริหารสัญญา บอกเลิกสัญญา ตกลงยกเลิกสัญญา แก้ไขสัญญา เปลี่ยนแปลงสัญญา งดหรือลดค่าปรับ หรือขยายเวลาทำการ ให้เริ่มอ่าน `prb60.md` ก่อน เว้นแต่ผู้ใช้ถามเจาะว่าเป็น `ระเบียบข้อใด`
+- สำหรับคำถามซับซ้อน chatbot ควรถามผู้ใช้ก่อนว่าต้องการ “ตอบตามตัวบทเท่านั้น” หรือ “ตอบเชิงปฏิบัติโดยอ้างคู่มือ/แนววินิจฉัยประกอบ” เมื่อมี reference ประเภทอื่นเพิ่มในอนาคต
