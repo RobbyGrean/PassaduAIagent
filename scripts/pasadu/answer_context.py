@@ -6,14 +6,39 @@ from common import REPO_ROOT, read_text
 from retrieve import retrieve
 
 
-def build_context(query: str, limit: int = 5) -> str:
-    rules = read_text(REPO_ROOT / "pasadu.md").strip()
+COMPACT_RULES = """\
+Use the Pasadu workflow without loading full reference files:
+- Route the question with scripts/pasadu/route_query.py policy.
+- Use only the retrieved references below as legal basis for the answer.
+- Do not answer from memory alone.
+- Do not invent law, clause numbers, circulars, or official rulings.
+- Cite each legal basis as source + clause type + clause number.
+- If retrieved references do not answer the question, say the answer was not found in the available project references.
+- If facts are missing, ask concise follow-up questions before diagnosing.
+- Keep the answer practical, in Thai, and separate summary, legal basis, reasoning, and cautions when useful.
+- For web/circular questions, use only official sources and label them separately from Act/Regulation references.
+"""
+
+
+def load_rules(full_rules: bool) -> str:
+    if full_rules:
+        return read_text(REPO_ROOT / "pasadu.md").strip()
+    return COMPACT_RULES.strip()
+
+
+def build_context(query: str, limit: int = 5, full_rules: bool = False) -> str:
+    rules = load_rules(full_rules)
     retrieved = retrieve(query, limit=limit)
     lines = [
         "# Pasadu Answer Context",
         "",
-        "## Rules",
+        "## Compact Rules" if not full_rules else "## Full Rules",
         rules,
+        "",
+        "## Route",
+        f"sources: {', '.join(retrieved['route'].get('sources', []))}",
+        f"fallback_sources: {', '.join(retrieved['route'].get('fallback_sources', []))}",
+        f"used_fallback: {retrieved['route'].get('used_fallback', False)}",
         "",
         "## User Question",
         query,
@@ -45,8 +70,13 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Build the context block for an LLM answer.")
     parser.add_argument("query", help="User question")
     parser.add_argument("--limit", type=int, default=5)
+    parser.add_argument(
+        "--full-rules",
+        action="store_true",
+        help="Include the full pasadu.md rules instead of compact rules.",
+    )
     args = parser.parse_args()
-    print(build_context(args.query, limit=args.limit))
+    print(build_context(args.query, limit=args.limit, full_rules=args.full_rules))
 
 
 if __name__ == "__main__":
