@@ -19,6 +19,13 @@ So the expensive part is not the size of `chunks.json` on disk. The expensive pa
 
 `answer_context.py` now uses compact rules by default. It preserves the same routing and retrieval workflow, but it does not inject the full `pasadu.md` into every generated context block.
 
+When Pasadu is invoked for the first time in a new thread, the agent should briefly tell the user there are two modes:
+
+- `compact` is the default and is recommended for normal questions.
+- `full rules` is available when the user wants the full `pasadu.md` rules included.
+
+If the user asks a direct legal question without choosing a mode, proceed with `compact` instead of blocking the answer.
+
 Default:
 
 ```powershell

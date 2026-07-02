@@ -122,3 +122,19 @@ For diagnosis, use this shape:
 ข้อควรตรวจเพิ่ม:
 - ...
 ```
+
+## Context Mode Choice
+
+At the first Pasadu interaction in a new thread, briefly tell the user that two context modes are available:
+
+- `compact` keeps the same routing/retrieval workflow but uses compact operating rules to save tokens. This is the default.
+- `full rules` includes the full `pasadu.md` rules in the generated answer context. Use it when the user wants maximum instruction detail or is auditing behavior.
+
+Do not block direct legal questions just to ask this. If the user has not chosen a mode, proceed with `compact` and mention once that they can request `full rules` anytime.
+
+For script usage:
+
+```powershell
+python scripts\pasadu\answer_context.py "question"
+python scripts\pasadu\answer_context.py "question" --full-rules
+```
