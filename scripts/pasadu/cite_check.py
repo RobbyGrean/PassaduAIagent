@@ -8,7 +8,7 @@ from common import INDEX_ROOT, normalize_digits, read_json, read_text
 
 
 CITATION_RE = re.compile(
-    r"(reference/law/(?:prb60|rbb60)\.md)\s+(มาตรา|ข้อ)\s*([0-9๐-๙]+)"
+    r"(reference/law/(?:prb60|rbb60|rbb60-3)\.md)\s+(มาตรา|ข้อ)\s*([0-9๐-๙]+(?:/[0-9๐-๙]+)?)"
 )
 
 

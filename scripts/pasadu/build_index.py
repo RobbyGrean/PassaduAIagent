@@ -7,7 +7,7 @@ from pathlib import Path
 from common import INDEX_ROOT, LAW_FILES, compact_whitespace, read_text, repo_relative, write_json
 
 
-SECTION_RE = re.compile(r"^###\s+(มาตรา|ข้อ)\s+([0-9๐-๙]+)\b(.*)$")
+SECTION_RE = re.compile(r"^###\s+(มาตรา|ข้อ)\s+([0-9๐-๙]+(?:/[0-9๐-๙]+)?)\b(.*)$")
 HEADING_RE = re.compile(r"^(#{1,2})\s+(.+)$")
 
 
@@ -119,6 +119,13 @@ def build_index() -> dict[str, object]:
         "บทกำหนดโทษ": ["reference/law/prb60.md"],
         "ระเบียบ": ["reference/law/rbb60.md"],
         "ข้อ": ["reference/law/rbb60.md"],
+        "ระเบียบฉบับที่ 3": ["reference/law/rbb60-3.md"],
+        "ข้อ 190": ["reference/law/rbb60-3.md"],
+        "ข้อ 191": ["reference/law/rbb60-3.md"],
+        "คะแนนความเสียหาย": ["reference/law/rbb60-3.md"],
+        "คะแนนความเสียหายสะสม": ["reference/law/rbb60-3.md"],
+        "การระงับการยื่นข้อเสนอ": ["reference/law/rbb60-3.md"],
+        "การประเมินผลการปฏิบัติงานของผู้ประกอบการ": ["reference/law/rbb60-3.md"],
         "วิธีเฉพาะเจาะจง": ["reference/law/rbb60.md"],
         "วิธีคัดเลือก": ["reference/law/rbb60.md"],
         "e-bidding": ["reference/law/rbb60.md"],

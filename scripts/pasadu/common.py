@@ -12,6 +12,7 @@ INDEX_ROOT = REPO_ROOT / "data" / "index"
 LAW_FILES = {
     "prb60": REFERENCE_ROOT / "law" / "prb60.md",
     "rbb60": REFERENCE_ROOT / "law" / "rbb60.md",
+    "rbb60-3": REFERENCE_ROOT / "law" / "rbb60-3.md",
 }
 
 THAI_DIGITS = str.maketrans("๐๑๒๓๔๕๖๗๘๙", "0123456789")

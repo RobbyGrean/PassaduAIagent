@@ -37,7 +37,7 @@ DOMAIN_KEYWORDS = [
 
 
 def requested_clause(query: str) -> tuple[str, str] | None:
-    match = re.search(r"(มาตรา|ข้อ)\s*([0-9๐-๙]+)", query)
+    match = re.search(r"(มาตรา|ข้อ)\s*([0-9๐-๙]+(?:/[0-9๐-๙]+)?)", query)
     if not match:
         return None
     label, number = match.groups()

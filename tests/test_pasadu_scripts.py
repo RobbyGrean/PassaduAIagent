@@ -40,6 +40,31 @@ class PasaduScriptTests(unittest.TestCase):
         result = route_query("ระเบียบข้อไหนพูดถึงการแก้ไขสัญญา")
         self.assertEqual(result["sources"], ["reference/law/rbb60.md"])
 
+    def test_route_rbb3_direct_clause(self):
+        result = route_query("ข้อ 190/3 ประเมินอะไร")
+        self.assertEqual(result["sources"], ["reference/law/rbb60-3.md"])
+        self.assertEqual(result["fallback_sources"], ["reference/law/rbb60.md", "reference/law/prb60.md"])
+
+    def test_route_general_construction_does_not_force_rbb3(self):
+        result = route_query("งานก่อสร้างใช้วิธีเฉพาะเจาะจงได้ไหม")
+        self.assertEqual(result["sources"], ["reference/law/rbb60.md"])
+        self.assertFalse(result["needs_scope_check"])
+
+    def test_route_scope_gate_for_contractor_evaluation_question(self):
+        result = route_query("งานก่อสร้างต้องประเมินผู้รับเหมาไหม")
+        self.assertTrue(result["needs_scope_check"])
+        self.assertEqual(len(result["scope_questions"]), 3)
+
+    def test_route_scope_gate_for_issue_three_applicability_question(self):
+        result = route_query("งานก่อสร้างต้องใช้ระเบียบฉบับที่ 3 ไหม")
+        self.assertEqual(result["sources"], ["reference/law/rbb60.md"])
+        self.assertEqual(result["fallback_sources"], ["reference/law/prb60.md"])
+        self.assertTrue(result["needs_scope_check"])
+
+    def test_route_damage_term_directly_to_rbb3(self):
+        result = route_query("อันตรายสาหัสคิดคะแนนอย่างไร")
+        self.assertEqual(result["sources"], ["reference/law/rbb60-3.md"])
+
     def test_retrieve_direct_clause(self):
         result = retrieve("มาตรา 56 กล่าวถึงอะไร", limit=3)
         top = result["results"][0]
@@ -49,6 +74,10 @@ class PasaduScriptTests(unittest.TestCase):
 
     def test_cite_check_accepts_existing_citation(self):
         result = check_citations("อ้างอิง: reference/law/prb60.md มาตรา 56")
+        self.assertTrue(result["ok"])
+
+    def test_cite_check_accepts_rbb3_fraction_clause(self):
+        result = check_citations("อ้างอิง: reference/law/rbb60-3.md ข้อ 190/3")
         self.assertTrue(result["ok"])
 
     def test_cite_check_rejects_missing_citation(self):
