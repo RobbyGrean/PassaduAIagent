@@ -192,8 +192,7 @@ def route_query(query: str) -> dict[str, object]:
         keyword.lower() in q for keyword in RBB3_SCOPE_KEYWORDS
     ) and ("งานก่อสร้าง" in q or "อาคาร" in q)
     asks_rbb3_applicability = (
-        "งานก่อสร้าง" in q
-        and any(keyword in q for keyword in ["ต้องใช้", "ใช้ระเบียบ", "เข้าข่าย"])
+        any(keyword in q for keyword in ["ต้องใช้", "ใช้ระเบียบ", "เข้าข่าย"])
         and any(keyword in q for keyword in ["ฉบับที่ 3", "ฉบับ 3", "rbb60-3"])
     )
     needs_rbb3_scope_check = (

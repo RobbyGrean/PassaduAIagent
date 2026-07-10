@@ -50,6 +50,11 @@ Default policy:
 - If the user explicitly asks for `ข้อ` or `ระเบียบ`, search the most specific Regulation file first. Use `reference/law/rbb60-3.md` when the question points to issue 3, ข้อ 190-191, contractor performance evaluation, damage scores, or suspension; otherwise use `reference/law/rbb60.md` first. Fall back to the other Regulation file and then to `reference/law/prb60.md` when needed.
 - For contract administration issues such as บริหารสัญญา, บอกเลิกสัญญา, ตกลงยกเลิกสัญญา, แก้ไขสัญญา, เปลี่ยนแปลงสัญญา, งดหรือลดค่าปรับ, or ขยายเวลาทำการ, search `reference/law/prb60.md` first, unless the user explicitly asks for a Regulation clause.
 - Do not route to `reference/law/rbb60-3.md` only because the query mentions `งานก่อสร้าง`. If the user asks a general construction procurement question, follow the normal `rbb60.md`/`prb60.md` policy first. If the answer depends on whether the project is in scope for issue 3 and the facts are missing, ask the three scope-gate questions before citing `rbb60-3.md`.
+- When the scope is unknown, return `needs_scope_check = true`, use `reference/law/rbb60.md` as the source and `reference/law/prb60.md` as fallback, then ask exactly:
+  1. งานก่อสร้างนี้มูลค่า 5 ล้านบาทขึ้นไป และเป็นของ 6 หน่วยงานหลักหรือไม่?
+  2. งานนี้เป็นอาคารสูง อาคารขนาดใหญ่พิเศษ หรืออาคารชุมนุมคนหรือไม่?
+  3. งานก่อสร้างนี้มีมูลค่าตั้งแต่ 1,000 ล้านบาทขึ้นไปหรือไม่?
+- A direct question about issue 3, ข้อ 190, ข้อ 190/1-190/9, ข้อ 191, damage scores, suspension, อันตรายสาหัส, or ทรัพย์สินเสียหาย bypasses the scope gate and routes directly to `reference/law/rbb60-3.md`.
 
 Use `reference/law/prb60.md` when the question concerns:
 
@@ -102,6 +107,7 @@ For direct questions such as "มาตรา 56 คืออะไร", "ข้
 - Do not treat manuals, circulars, rulings, FAQ, examples, or checklists as higher authority than the Act or Regulation. When those references are added later, label them as supporting practical guidance unless the user asks otherwise.
 - When references conflict, explain the conflict and prioritize the Regulation for operational steps, except contract administration issues where the Act must be checked first under this skill's routing policy.
 - Treat summaries inside `rbb60-3.md` as supporting explanation only. For legal answers, cite the regulation clauses or annex tables, not the summary section alone.
+- Use the citation form `reference/law/rbb60-3.md ข้อ ...`, including slash clauses such as `reference/law/rbb60-3.md ข้อ 190/3`.
 
 ## Preferred Output
 

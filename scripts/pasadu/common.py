@@ -16,6 +16,7 @@ LAW_FILES = {
 }
 
 THAI_DIGITS = str.maketrans("๐๑๒๓๔๕๖๗๘๙", "0123456789")
+CLAUSE_NUMBER_PATTERN = r"[0-9๐-๙]+(?:/[0-9๐-๙]+)?"
 
 
 def normalize_digits(text: str) -> str:

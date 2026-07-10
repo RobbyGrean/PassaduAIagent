@@ -52,11 +52,20 @@ class PasaduScriptTests(unittest.TestCase):
 
     def test_route_scope_gate_for_contractor_evaluation_question(self):
         result = route_query("งานก่อสร้างต้องประเมินผู้รับเหมาไหม")
+        self.assertEqual(result["sources"], ["reference/law/rbb60.md"])
+        self.assertEqual(result["fallback_sources"], ["reference/law/prb60.md"])
         self.assertTrue(result["needs_scope_check"])
-        self.assertEqual(len(result["scope_questions"]), 3)
+        self.assertEqual(
+            result["scope_questions"],
+            [
+                "งานก่อสร้างนี้มูลค่า 5 ล้านบาทขึ้นไป และเป็นของ 6 หน่วยงานหลักหรือไม่?",
+                "งานนี้เป็นอาคารสูง อาคารขนาดใหญ่พิเศษ หรืออาคารชุมนุมคนหรือไม่?",
+                "งานก่อสร้างนี้มีมูลค่าตั้งแต่ 1,000 ล้านบาทขึ้นไปหรือไม่?",
+            ],
+        )
 
     def test_route_scope_gate_for_issue_three_applicability_question(self):
-        result = route_query("งานก่อสร้างต้องใช้ระเบียบฉบับที่ 3 ไหม")
+        result = route_query("ต้องใช้ระเบียบฉบับที่ 3 ไหม")
         self.assertEqual(result["sources"], ["reference/law/rbb60.md"])
         self.assertEqual(result["fallback_sources"], ["reference/law/prb60.md"])
         self.assertTrue(result["needs_scope_check"])
@@ -64,6 +73,17 @@ class PasaduScriptTests(unittest.TestCase):
     def test_route_damage_term_directly_to_rbb3(self):
         result = route_query("อันตรายสาหัสคิดคะแนนอย่างไร")
         self.assertEqual(result["sources"], ["reference/law/rbb60-3.md"])
+
+    def test_route_property_damage_term_directly_to_rbb3(self):
+        result = route_query("ทรัพย์สินเสียหายคิดคะแนนอย่างไร")
+        self.assertEqual(result["sources"], ["reference/law/rbb60-3.md"])
+
+    def test_retrieve_rbb3_fraction_clause(self):
+        result = retrieve("ข้อ 190/3 ประเมินอะไร", limit=3)
+        top = result["results"][0]
+        self.assertEqual(top["source"], "reference/law/rbb60-3.md")
+        self.assertEqual(top["clause_type"], "ข้อ")
+        self.assertEqual(top["clause_no"], "190/3")
 
     def test_retrieve_direct_clause(self):
         result = retrieve("มาตรา 56 กล่าวถึงอะไร", limit=3)

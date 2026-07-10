@@ -4,10 +4,18 @@ import argparse
 import re
 from pathlib import Path
 
-from common import INDEX_ROOT, LAW_FILES, compact_whitespace, read_text, repo_relative, write_json
+from common import (
+    CLAUSE_NUMBER_PATTERN,
+    INDEX_ROOT,
+    LAW_FILES,
+    compact_whitespace,
+    read_text,
+    repo_relative,
+    write_json,
+)
 
 
-SECTION_RE = re.compile(r"^###\s+(มาตรา|ข้อ)\s+([0-9๐-๙]+(?:/[0-9๐-๙]+)?)\b(.*)$")
+SECTION_RE = re.compile(rf"^###\s+(มาตรา|ข้อ)\s+({CLAUSE_NUMBER_PATTERN})\b(.*)$")
 HEADING_RE = re.compile(r"^(#{1,2})\s+(.+)$")
 
 
@@ -125,7 +133,10 @@ def build_index() -> dict[str, object]:
         "คะแนนความเสียหาย": ["reference/law/rbb60-3.md"],
         "คะแนนความเสียหายสะสม": ["reference/law/rbb60-3.md"],
         "การระงับการยื่นข้อเสนอ": ["reference/law/rbb60-3.md"],
+        "การระงับการทำสัญญา": ["reference/law/rbb60-3.md"],
         "การประเมินผลการปฏิบัติงานของผู้ประกอบการ": ["reference/law/rbb60-3.md"],
+        "อันตรายสาหัส": ["reference/law/rbb60-3.md"],
+        "ทรัพย์สินเสียหาย": ["reference/law/rbb60-3.md"],
         "วิธีเฉพาะเจาะจง": ["reference/law/rbb60.md"],
         "วิธีคัดเลือก": ["reference/law/rbb60.md"],
         "e-bidding": ["reference/law/rbb60.md"],

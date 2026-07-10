@@ -5,7 +5,7 @@ import json
 import math
 import re
 
-from common import INDEX_ROOT, normalize_digits, read_json, tokenize
+from common import CLAUSE_NUMBER_PATTERN, INDEX_ROOT, normalize_digits, read_json, tokenize
 from route_query import route_query
 
 
@@ -33,11 +33,18 @@ DOMAIN_KEYWORDS = [
     "จ้างที่ปรึกษา",
     "จ้างออกแบบ",
     "ควบคุมงานก่อสร้าง",
+    "การประเมินผลการปฏิบัติงานของผู้ประกอบการ",
+    "คะแนนความเสียหาย",
+    "คะแนนความเสียหายสะสม",
+    "การระงับการยื่นข้อเสนอ",
+    "การระงับการทำสัญญา",
+    "อันตรายสาหัส",
+    "ทรัพย์สินเสียหาย",
 ]
 
 
 def requested_clause(query: str) -> tuple[str, str] | None:
-    match = re.search(r"(มาตรา|ข้อ)\s*([0-9๐-๙]+(?:/[0-9๐-๙]+)?)", query)
+    match = re.search(rf"(มาตรา|ข้อ)\s*({CLAUSE_NUMBER_PATTERN})", query)
     if not match:
         return None
     label, number = match.groups()
