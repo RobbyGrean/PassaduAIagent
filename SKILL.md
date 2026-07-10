@@ -1,9 +1,22 @@
 ---
 name: pasadu
-description: Use when the user says "/pasadu" or asks about Thai government procurement law: การจัดซื้อจัดจ้าง, พัสดุภาครัฐ, พรบ., พ.ร.บ., พระราชบัญญัติ, ระเบียบ, ระเบียบฉบับที่ 3, มาตรา, ข้อ, ข้อ 190-191, วิธีจัดซื้อจัดจ้าง, สัญญา, หลักประกัน, ตรวจรับ, ประเมินผลผู้ประกอบการ, คะแนนความเสียหาย, อำนาจอนุมัติ, ร้องเรียน, or diagnosis of Thai government procurement issues. Uses pasadu.md, routes to prb60.md/rbb60.md/rbb60-3.md, retrieves exact clauses, and answers with verified citations.
+description: Automatically use for questions that concern or may depend on Thai government procurement and public supplies law, especially the Public Procurement and Supplies Administration Act B.E. 2560, กระทรวงการคลัง procurement regulations B.E. 2560, พ.ร.บ./พรบ., พระราชบัญญัติ, ระเบียบ, มาตรา, ข้อ, พัสดุภาครัฐ, การจัดซื้อจัดจ้าง, วิธีจัดซื้อจัดจ้าง, อำนาจอนุมัติ, ราคากลาง, TOR, สัญญา, หลักประกัน, ตรวจรับ, บริหารสัญญา, ร้องเรียน, อุทธรณ์, ระเบียบฉบับที่ 3, ข้อ 190-191, or diagnosis of a Thai public-procurement issue. Also use when the user explicitly types /pasadu or /passadu. Load pasadu.md, route to prb60.md/rbb60.md/rbb60-3.md, retrieve exact clauses, and answer with verified citations.
 ---
 
 # Pasadu Skill
+
+## Activation
+
+Activate this skill automatically when the user's question concerns, appears connected to, or may require interpretation of Thai government procurement and public supplies law. The user does not need to name the skill.
+
+Manual aliases are also valid triggers:
+
+- `/pasadu`
+- `/passadu`
+
+Treat either alias followed by text as an explicit request to use this skill. Do not require the alias when the intent already matches the skill description.
+
+Do not activate only because a prompt contains the generic word `กฎหมาย` or `สัญญา` when the context is clearly unrelated to Thai government procurement.
 
 ## Purpose
 
@@ -11,23 +24,21 @@ Use this skill to answer, explain, and diagnose questions about Thai government 
 
 ## Repository
 
-The source of truth for this skill is:
+The directory containing this `SKILL.md` is the source of truth for the skill.
 
-`C:\Users\PC\Documents\Pasadu AI Creation\PassaduAIagent`
-
-When this skill is installed under `C:\Users\PC\.codex\skills\pasadu`, still use the repository above for `pasadu.md` and all law reference files.
+Resolve every relative path below from that directory. Do not assume a specific Windows username, home directory, clone location, or operating system.
 
 ## Required Context
 
 Before answering a procurement-law question, read:
 
-`C:\Users\PC\Documents\Pasadu AI Creation\PassaduAIagent\pasadu.md`
+`pasadu.md`
 
 Use the law reference files only as needed:
 
-- `C:\Users\PC\Documents\Pasadu AI Creation\PassaduAIagent\reference\law\prb60.md` for พระราชบัญญัติการจัดซื้อจัดจ้างและการบริหารพัสดุภาครัฐ พ.ศ. 2560
-- `C:\Users\PC\Documents\Pasadu AI Creation\PassaduAIagent\reference\law\rbb60.md` for ระเบียบกระทรวงการคลังว่าด้วยการจัดซื้อจัดจ้างและการบริหารพัสดุภาครัฐ พ.ศ. 2560
-- `C:\Users\PC\Documents\Pasadu AI Creation\PassaduAIagent\reference\law\rbb60-3.md` for ระเบียบกระทรวงการคลังว่าด้วยการจัดซื้อจัดจ้างและการบริหารพัสดุภาครัฐ (ฉบับที่ 3) พ.ศ. 2569 โดยเฉพาะหมวด 7 ข้อ 190-191 เรื่องการประเมินผลการปฏิบัติงานของผู้ประกอบการงานก่อสร้าง คะแนนความเสียหาย และการระงับการยื่นข้อเสนอหรือทำสัญญา
+- `reference/law/prb60.md` for พระราชบัญญัติการจัดซื้อจัดจ้างและการบริหารพัสดุภาครัฐ พ.ศ. 2560
+- `reference/law/rbb60.md` for ระเบียบกระทรวงการคลังว่าด้วยการจัดซื้อจัดจ้างและการบริหารพัสดุภาครัฐ พ.ศ. 2560
+- `reference/law/rbb60-3.md` for ระเบียบกระทรวงการคลังว่าด้วยการจัดซื้อจัดจ้างและการบริหารพัสดุภาครัฐ (ฉบับที่ 3) พ.ศ. 2569 โดยเฉพาะหมวด 7 ข้อ 190-191 เรื่องการประเมินผลการปฏิบัติงานของผู้ประกอบการงานก่อสร้าง คะแนนความเสียหาย และการระงับการยื่นข้อเสนอหรือทำสัญญา
 
 ## Retrieval Scripts
 
