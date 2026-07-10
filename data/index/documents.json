@@ -40,5 +40,11 @@
       "encoding": "UTF-8"
     },
     "chunk_count": 223
+  },
+  {
+    "source": "reference/law/rbb60-3.md",
+    "doc_type": "regulation",
+    "metadata": {},
+    "chunk_count": 17
   }
 ]
