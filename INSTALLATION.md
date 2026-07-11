@@ -10,7 +10,9 @@ Repository: <https://github.com/RobbyGrean/PassaduAIagent>
 - [สิ่งที่ถูกติดตั้ง](#สิ่งที่ถูกติดตั้ง)
 - [ข้อกำหนดก่อนติดตั้ง](#ข้อกำหนดก่อนติดตั้ง)
 - [ติดตั้งบน Codex Windows App](#ติดตั้งบน-codex-windows-app)
+- [ใช้งานบน ChatGPT Work](#ใช้งานบน-chatgpt-work)
 - [ติดตั้งบน Codex CLI](#ติดตั้งบน-codex-cli)
+- [ติดตั้งบน Gemini CLI](#ติดตั้งบน-gemini-cli)
 - [ติดตั้งบน Claude Code](#ติดตั้งบน-claude-code)
 - [ใช้งานบน Claudeai](#ใช้งานบน-claudeai)
 - [Workflow ของ Pasadu](#workflow-ของ-pasadu)
@@ -177,6 +179,65 @@ Manual trigger ใช้เมื่อต้องการบังคับ r
 
 ---
 
+## ใช้งานบน ChatGPT Work
+
+ChatGPT Work ใน Codex Desktop App สามารถ discover และ activate Pasadu ที่ติดตั้งไว้ใน user-level Codex skills directory ได้:
+
+```text
+%USERPROFILE%\.codex\skills\pasadu\
+```
+
+ให้ติดตั้ง Pasadu ตามหัวข้อ [ติดตั้งบน Codex Windows App](#ติดตั้งบน-codex-windows-app) ก่อน แล้วปิดและเปิด ChatGPT/Codex Desktop App ใหม่
+
+### วิธีใช้งาน
+
+1. เลือก `Work` จากตัวเลือกโหมดด้านบนของหน้าต่าง ChatGPT
+2. เริ่มงานใหม่
+3. ถามคำถามด้านพัสดุตามธรรมชาติ
+
+ตัวอย่าง:
+
+```text
+วิธีเฉพาะเจาะจงใช้ได้ในกรณีใด กรุณาอ้างตัวบท
+```
+
+```text
+เรื่องใดที่ผู้ยื่นข้อเสนออุทธรณ์ไม่ได้
+```
+
+Work จะตรวจ intent จาก `name` และ `description` ใน `SKILL.md` หากตรงกับขอบเขต Pasadu ระบบจะแสดง skill `Pasadu` และ activate skill เพื่ออ่านคำสั่งกับ reference ที่อยู่ใน directory เดียวกัน
+
+ถ้า auto-trigger ไม่ทำงาน ให้ระบุชื่อ skill โดยตรง:
+
+```text
+ใช้ skill pasadu ตอบคำถามนี้: วงเงินเล็กน้อยไม่ทำข้อตกลงเป็นหนังสือได้ไหม
+```
+
+### `/pasadu` และ `/passadu`
+
+Pasadu รองรับ `/pasadu` และ `/passadu` เป็นข้อความ trigger ตามกติกาใน `SKILL.md` แต่ไม่ได้หมายความว่าทั้งสองคำจะปรากฏเป็น native slash command ในเมนูของ Work ทุกเวอร์ชัน
+
+ถ้าพิมพ์ slash command แล้ว UI ไม่รู้จัก ให้ใช้คำถามตามธรรมชาติหรือ `ใช้ skill pasadu ...` แทน ไม่จำเป็นต้องใส่ slash ทุกครั้ง
+
+### ตรวจว่า Work โหลด skill แล้วหรือไม่
+
+สังเกตชื่อหรือ chip `Pasadu` ในข้อความตอบ หากต้องการตรวจโดยตรง ให้ถาม:
+
+```text
+เช็กสกิล pasadu และบอกว่าอ่าน SKILL.md กับ reference อะไรได้บ้าง
+```
+
+คำตอบควรกล่าวถึง `SKILL.md`, `pasadu.md` และ reference ด้านกฎหมาย/ระเบียบ/กฎกระทรวง/หนังสือเวียนที่ติดตั้งอยู่
+
+### ขอบเขตของ Work
+
+- เหมาะสำหรับถามตอบ วิเคราะห์ และอธิบายงานพัสดุจาก reference ใน Pasadu
+- ความสามารถรัน Python, แก้ repository, commit หรือใช้ terminal ขึ้นกับ tools ที่ Work เปิดให้ใน session นั้น
+- งานพัฒนา routing, regenerate index, tests และ Git workflow ควรใช้ Codex
+- งานถามตอบทั่วไปไม่ต้องเปลี่ยนไป Codex หาก Work แสดงว่า Pasadu ถูก activate แล้ว
+
+---
+
 ## ติดตั้งบน Codex CLI
 
 Codex CLI และ Codex App ใช้ user-level skills directory เดียวกัน จึงใช้คำสั่ง PowerShell ชุดเดียวกับ Quick Start:
@@ -199,6 +260,117 @@ $pasadu อธิบายหน้าที่ของคณะกรรมก
 mkdir -p ~/.codex/skills
 git clone https://github.com/RobbyGrean/PassaduAIagent.git ~/.codex/skills/pasadu
 ```
+
+---
+
+## ติดตั้งบน Gemini CLI
+
+Pasadu ใช้งานกับ Gemini CLI ได้ในรูปแบบ Agent Skill เพราะ repository มี `SKILL.md` ที่ root และรวม reference, retrieval scripts, index, tests และเอกสารประกอบไว้ใน directory เดียวกัน
+
+Gemini CLI ค้น skill จาก:
+
+- User scope: `~/.gemini/skills/` หรือ `~/.agents/skills/`
+- Workspace scope: `.gemini/skills/` หรือ `.agents/skills/`
+
+ควรใช้ Gemini CLI รุ่นล่าสุดที่รองรับ Agent Skills:
+
+```powershell
+npm install -g @google/gemini-cli@latest
+gemini --version
+```
+
+### วิธีแนะนำ: ติดตั้งด้วย Gemini CLI
+
+รันคำสั่งนี้จาก terminal ปกติ ไม่ใช่ภายใน interactive Gemini session:
+
+```powershell
+gemini skills install https://github.com/RobbyGrean/PassaduAIagent.git --scope user
+```
+
+Gemini จะแสดงรายละเอียดและขอ consent ก่อนติดตั้ง ตรวจข้อมูลให้เรียบร้อยแล้วจึงยืนยัน หากต้องการติดตั้งเฉพาะ workspace ปัจจุบัน ใช้:
+
+```powershell
+gemini skills install https://github.com/RobbyGrean/PassaduAIagent.git --scope workspace
+```
+
+เปิด Gemini CLI แล้วตรวจว่า discover skill ได้:
+
+```text
+/skills list all
+/skills reload
+```
+
+จากนั้นถามตามธรรมชาติ เช่น:
+
+```text
+วิธีเฉพาะเจาะจงใช้ได้ในกรณีใด กรุณาอ้างตัวบท
+```
+
+หรือระบุชื่อ skill โดยตรง:
+
+```text
+ใช้ skill pasadu อธิบายว่าเรื่องใดอุทธรณ์ไม่ได้
+```
+
+Gemini จะตรวจ intent และขออนุญาต activate skill เมื่อคำถามตรงกับ description ของ Pasadu เครื่องมือ `activate_skill` ถูกเรียกโดย Gemini agent ไม่ใช่คำสั่งที่ผู้ใช้เรียกเอง
+
+> `/pasadu` และ `/passadu` เป็น textual aliases ที่ Pasadu เข้าใจ แต่ไม่ได้สร้าง native Gemini slash command ให้อัตโนมัติ หาก Gemini แจ้งว่าไม่รู้จัก slash command ให้ถามตามธรรมชาติหรือใช้ `ใช้ skill pasadu ...` แทน
+
+### วิธี manual: Clone เป็น user skill
+
+วิธีนี้เหมาะเมื่ออยากควบคุมการ update ด้วย Git โดยตรง
+
+#### Windows PowerShell
+
+```powershell
+New-Item -ItemType Directory -Force "$env:USERPROFILE\.gemini\skills" | Out-Null
+git clone https://github.com/RobbyGrean/PassaduAIagent.git "$env:USERPROFILE\.gemini\skills\pasadu"
+```
+
+#### macOS และ Linux
+
+```bash
+mkdir -p ~/.gemini/skills
+git clone https://github.com/RobbyGrean/PassaduAIagent.git ~/.gemini/skills/pasadu
+```
+
+โครงสร้างที่ถูกต้อง:
+
+```text
+~/.gemini/skills/pasadu/SKILL.md
+~/.gemini/skills/pasadu/pasadu.md
+~/.gemini/skills/pasadu/reference/
+~/.gemini/skills/pasadu/scripts/pasadu/
+```
+
+หลัง clone ให้เปิด Gemini CLI ใหม่หรือรัน `/skills reload`
+
+### อัปเดต Gemini CLI skill ที่ clone แบบ manual
+
+#### Windows PowerShell
+
+```powershell
+git -C "$env:USERPROFILE\.gemini\skills\pasadu" pull --ff-only
+```
+
+#### macOS และ Linux
+
+```bash
+git -C ~/.gemini/skills/pasadu pull --ff-only
+```
+
+หลัง update ให้รัน `/skills reload` หรือเริ่ม Gemini CLI session ใหม่
+
+### ทดสอบ retrieval scripts ใน Gemini installation
+
+```powershell
+Set-Location "$env:USERPROFILE\.gemini\skills\pasadu"
+python scripts\pasadu\build_index.py
+python scripts\pasadu\route_query.py "วิธีเฉพาะเจาะจงใช้กรณีใด" --json
+python -m unittest discover -s tests -v
+```
+
+คำถามวิธีเฉพาะเจาะจงควร route ตามลำดับ `prb60.md` มาตรา 56 → กฎกระทรวงเจาะจง → `rbb60.md`
 
 ---
 
@@ -417,7 +589,9 @@ Remove-Item -LiteralPath "$env:USERPROFILE\.claude\skills\pasadu" -Recurse
 
 ---
 
-## แหล่งอ้างอิงเกี่ยวกับ Codex Skills
+## แหล่งอ้างอิงเกี่ยวกับ Agent Skills
 
 - OpenAI — Build skills: <https://developers.openai.com/codex/skills/>
 - OpenAI — Slash commands: <https://learn.chatgpt.com/docs/reference/slash-commands>
+- Gemini CLI — Agent Skills: <https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/skills.md>
+- Gemini CLI — Activate skill tool: <https://github.com/google-gemini/gemini-cli/blob/main/docs/tools/activate-skill.md>
