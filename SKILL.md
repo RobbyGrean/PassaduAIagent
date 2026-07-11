@@ -1,6 +1,6 @@
 ---
 name: pasadu
-description: Automatically use for questions that concern or may depend on Thai government procurement and public supplies law, especially the Public Procurement and Supplies Administration Act B.E. 2560, กระทรวงการคลัง procurement regulations B.E. 2560, พ.ร.บ./พรบ., พระราชบัญญัติ, ระเบียบ, มาตรา, ข้อ, พัสดุภาครัฐ, การจัดซื้อจัดจ้าง, วิธีจัดซื้อจัดจ้าง, อำนาจอนุมัติ, ราคากลาง, TOR, สัญญา, หลักประกัน, ตรวจรับ, บริหารสัญญา, ร้องเรียน, อุทธรณ์, ระเบียบฉบับที่ 3, ข้อ 190-191, or diagnosis of a Thai public-procurement issue. Also use when the user explicitly types /pasadu or /passadu. Load pasadu.md, route to prb60.md/rbb60.md/rbb60-3.md, retrieve exact clauses, and answer with verified citations.
+description: Automatically use for questions that concern or may depend on Thai government procurement and public supplies law, including Acts, Regulations, ministerial regulations, and circular guidance in this repository. Also use when the user explicitly types /pasadu or /passadu. Load pasadu.md, route to the most specific reference, retrieve exact provisions, and answer with verified citations.
 ---
 
 # Pasadu Skill
@@ -39,12 +39,16 @@ Use the law reference files only as needed:
 - `reference/law/prb60.md` for พระราชบัญญัติการจัดซื้อจัดจ้างและการบริหารพัสดุภาครัฐ พ.ศ. 2560
 - `reference/law/rbb60.md` for ระเบียบกระทรวงการคลังว่าด้วยการจัดซื้อจัดจ้างและการบริหารพัสดุภาครัฐ พ.ศ. 2560
 - `reference/law/rbb60-3.md` for ระเบียบกระทรวงการคลังว่าด้วยการจัดซื้อจัดจ้างและการบริหารพัสดุภาครัฐ (ฉบับที่ 3) พ.ศ. 2569 โดยเฉพาะหมวด 7 ข้อ 190-191 เรื่องการประเมินผลการปฏิบัติงานของผู้ประกอบการงานก่อสร้าง คะแนนความเสียหาย และการระงับการยื่นข้อเสนอหรือทำสัญญา
+- `reference/law/ministerial-regulations/mr-specific-2560.md` for กฎกระทรวงเฉพาะเจาะจงและวงเงินเล็กน้อย
+- `reference/law/ministerial-regulations/mr-appeal-exclusions-2568.md` for กฎกระทรวงอุทธรณ์และเรื่องที่อุทธรณ์ไม่ได้
+- `reference/circulars/circular-w367-2567.md` for ว 367 และกรณีไม่เข้าข่ายใช้สิทธิอุทธรณ์ตามมาตรา 114
+- `reference/circulars/circular-w214-2563.md` for ว 214 และการกำหนดคุณสมบัติผู้ยื่นเสนอราคา
 
 ## Retrieval Scripts
 
 When available, use the repository scripts to avoid reading entire reference files for one question:
 
-- `scripts/pasadu/build_index.py` builds `data/index/*.json` from `prb60.md`, `rbb60.md`, and `rbb60-3.md`.
+- `scripts/pasadu/build_index.py` builds `data/index/*.json` from every registered reference source.
 - `scripts/pasadu/route_query.py` decides the primary source and fallback source.
 - `scripts/pasadu/retrieve.py` returns the most relevant clauses with file and clause citations.
 - `scripts/pasadu/answer_context.py` builds an LLM-ready context from `pasadu.md`, the user question, and retrieved references.
@@ -55,6 +59,12 @@ If the index is missing or stale, run `build_index.py` first. If scripts cannot 
 ## Routing
 
 Default policy:
+
+- Route `ว 214` or questions about `การกำหนดคุณสมบัติผู้ยื่นเสนอราคา` to `reference/circulars/circular-w214-2563.md` first.
+- Route every `เจาะจง` or `เฉพาะเจาะจง` question in authority order: `prb60.md` section 56, `mr-specific-2560.md`, then `rbb60.md`. Use the same chain for `วงเงินเล็กน้อย`, `ไม่ทำข้อตกลงเป็นหนังสือ`, or `กรรมการ/ผู้ตรวจรับคนเดียว`.
+- Route general appeal questions to `prb60.md` sections 114-119 together with the appeal ministerial regulation and Circular W367.
+- Route `เรื่องที่อุทธรณ์ไม่ได้` or `กฎกระทรวงอุทธรณ์` to the appeal ministerial regulation plus `prb60.md`.
+- Route `ไม่เข้าข่ายที่จะใช้สิทธิอุทธรณ์ตามมาตรา 114` or `ว 367` to Circular W367 plus `prb60.md`.
 
 - For general operational questions, search `reference/law/rbb60.md` first because day-to-day procurement practice follows the Regulation, then use `reference/law/prb60.md` as fallback or supporting authority.
 - If the user explicitly asks for `มาตรา`, `พรบ.`, `พ.ร.บ.`, or `พระราชบัญญัติ`, search `reference/law/prb60.md` first, then fallback to `reference/law/rbb60.md` if not found.
@@ -116,9 +126,11 @@ For direct questions such as "มาตรา 56 คืออะไร", "ข้
 - Do not change quoted statutory or regulatory text.
 - If the answer is not found in the available references, say so plainly.
 - Do not treat manuals, circulars, rulings, FAQ, examples, or checklists as higher authority than the Act or Regulation. When those references are added later, label them as supporting practical guidance unless the user asks otherwise.
+- Distinguish a non-appealable issue under section 115/the appeal ministerial regulation from a person or situation that does not qualify to exercise appeal rights under section 114 as described in Circular W367 item 2.
 - When references conflict, explain the conflict and prioritize the Regulation for operational steps, except contract administration issues where the Act must be checked first under this skill's routing policy.
 - Treat summaries inside `rbb60-3.md` as supporting explanation only. For legal answers, cite the regulation clauses or annex tables, not the summary section alone.
 - Use the citation form `reference/law/rbb60-3.md ข้อ ...`, including slash clauses such as `reference/law/rbb60-3.md ข้อ 190/3`.
+- Cite ministerial regulations by `ข้อ` and circulars by `หัวข้อ`, always including the repository path.
 
 ## Preferred Output
 

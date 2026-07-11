@@ -9,14 +9,19 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 REFERENCE_ROOT = REPO_ROOT / "reference"
 INDEX_ROOT = REPO_ROOT / "data" / "index"
 
-LAW_FILES = {
+REFERENCE_FILES = {
     "prb60": REFERENCE_ROOT / "law" / "prb60.md",
     "rbb60": REFERENCE_ROOT / "law" / "rbb60.md",
     "rbb60-3": REFERENCE_ROOT / "law" / "rbb60-3.md",
+    "mr-specific-2560": REFERENCE_ROOT / "law" / "ministerial-regulations" / "mr-specific-2560.md",
+    "mr-appeal-exclusions-2568": REFERENCE_ROOT / "law" / "ministerial-regulations" / "mr-appeal-exclusions-2568.md",
+    "circular-w367-2567": REFERENCE_ROOT / "circulars" / "circular-w367-2567.md",
+    "circular-w214-2563": REFERENCE_ROOT / "circulars" / "circular-w214-2563.md",
 }
 
 THAI_DIGITS = str.maketrans("๐๑๒๓๔๕๖๗๘๙", "0123456789")
 CLAUSE_NUMBER_PATTERN = r"[0-9๐-๙]+(?:/[0-9๐-๙]+)?"
+REFERENCE_SECTION_NUMBER_PATTERN = r"[0-9๐-๙]+(?:(?:/|\.)[0-9๐-๙]+)*"
 
 
 def normalize_digits(text: str) -> str:

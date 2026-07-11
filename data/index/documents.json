@@ -44,7 +44,257 @@
   {
     "source": "reference/law/rbb60-3.md",
     "doc_type": "regulation",
-    "metadata": {},
+    "metadata": {
+      "id": "rbb60-3",
+      "title_th": "ระเบียบกระทรวงการคลังว่าด้วยการจัดซื้อจัดจ้างและการบริหารพัสดุภาครัฐ (ฉบับที่ 3) พ.ศ. 2569",
+      "title_en": "",
+      "document_type": "regulation",
+      "jurisdiction": "Thailand",
+      "agency": "กระทรวงการคลัง",
+      "series": "ราชกิจจานุเบกษา เล่ม 143 ตอนพิเศษ 169 ง",
+      "issue_no": "3",
+      "year_be": "2569",
+      "year_ce": "2026",
+      "announcement_date": "2026-07-08",
+      "publication_date": "2026-07-09",
+      "effective_date": "2026-07-10",
+      "source_name": "ระเบียบ ฉบับ 3",
+      "source_type": "scanned_images",
+      "language": "th",
+      "tags": [
+        "procurement",
+        "regulation",
+        "thai-law",
+        "contractor-performance",
+        "construction"
+      ],
+      "related_refs": [
+        "rbb60"
+      ],
+      "status": "draft_ocr_reviewed",
+      "ocr_confidence": "high",
+      "notes": [
+        "ถอดข้อความจากภาพราชกิจจานุเบกษาจำนวน 12 หน้า รวมบัญชีเอกสารแนบท้าย",
+        "ปรับเลขไทยเป็นเลขอารบิกในหัวข้อและเนื้อหาเพื่อให้ค้นหาได้ง่าย โดยไม่เปลี่ยนสาระ"
+      ]
+    },
     "chunk_count": 17
+  },
+  {
+    "source": "reference/law/ministerial-regulations/mr-specific-2560.md",
+    "doc_type": "ministerial_regulation",
+    "metadata": {
+      "id": "mr-specific-2560",
+      "title_th": "กฎกระทรวงกำหนดวงเงินการจัดซื้อจัดจ้างพัสดุโดยวิธีเฉพาะเจาะจง วงเงินการจัดซื้อจัดจ้างที่ไม่ทำข้อตกลงเป็นหนังสือ และวงเงินการจัดซื้อจัดจ้างในการแต่งตั้งผู้ตรวจรับพัสดุ พ.ศ. 2560",
+      "title_en": "",
+      "aliases": [
+        "กฎกระทรวงเจาะจง",
+        "กฎกระทรวงวงเงินเล็กน้อย",
+        "กฎกระทรวงเจาะจง วงเงินเล็กน้อย"
+      ],
+      "document_type": "ministerial_regulation",
+      "jurisdiction": "Thailand",
+      "agency": "กระทรวงการคลัง",
+      "series": "ราชกิจจานุเบกษา เล่ม 134 ตอนที่ 86 ก",
+      "issue_no": "",
+      "year_be": "2560",
+      "year_ce": "2017",
+      "announcement_date": "2017-08-23",
+      "publication_date": "2017-08-23",
+      "effective_date": "",
+      "source_name": "กฎกระทรวงกำหนดวงเงินวิธีเฉพาะเจาะจง พ.ศ. 2560",
+      "source_type": "scanned_images",
+      "language": "th",
+      "tags": [
+        "procurement",
+        "ministerial-regulation",
+        "thai-law",
+        "specific-method",
+        "procurement-threshold"
+      ],
+      "topics": [
+        "วิธีเฉพาะเจาะจงตามกฎกระทรวง",
+        "วงเงินเล็กน้อย",
+        "การไม่ทำข้อตกลงเป็นหนังสือ",
+        "การแต่งตั้งผู้ตรวจรับพัสดุคนเดียว"
+      ],
+      "related_refs": [
+        "prb60"
+      ],
+      "status": "draft_ocr_reviewed",
+      "ocr_confidence": "high",
+      "notes": [
+        "ถอดข้อความจากภาพราชกิจจานุเบกษาจำนวน 2 หน้า",
+        "ปรับเลขไทยเป็นเลขอารบิกในหัวข้อและเนื้อหาเพื่อให้ค้นหาได้ง่าย โดยไม่เปลี่ยนสาระ"
+      ]
+    },
+    "chunk_count": 5
+  },
+  {
+    "source": "reference/law/ministerial-regulations/mr-appeal-exclusions-2568.md",
+    "doc_type": "ministerial_regulation",
+    "metadata": {
+      "id": "mr-appeal-exclusions-2568",
+      "title_th": "กฎกระทรวงกำหนดเรื่องการจัดซื้อจัดจ้างกับหน่วยงานของรัฐที่ใช้สิทธิอุทธรณ์ไม่ได้ พ.ศ. 2568",
+      "title_en": "",
+      "aliases": [
+        "กฎกระทรวงอุทธรณ์",
+        "กฎกระทรวงเรื่องอุทธรณ์"
+      ],
+      "document_type": "ministerial_regulation",
+      "jurisdiction": "Thailand",
+      "agency": "กระทรวงการคลัง",
+      "series": "ราชกิจจานุเบกษา เล่ม 142 ตอนที่ 28 ก",
+      "issue_no": "",
+      "year_be": "2568",
+      "year_ce": "2025",
+      "announcement_date": "2025-04-03",
+      "publication_date": "2025-04-18",
+      "effective_date": "2025-04-19",
+      "source_name": "กฎกระทรวงอุทธรณ์ พ.ศ. 2568",
+      "source_type": "scanned_images",
+      "language": "th",
+      "tags": [
+        "procurement",
+        "ministerial-regulation",
+        "thai-law",
+        "appeal",
+        "appeal-exclusion"
+      ],
+      "topics": [
+        "การอุทธรณ์"
+      ],
+      "related_refs": [
+        "prb60",
+        "circular-w367-2567"
+      ],
+      "related_provisions": [
+        "ref: prb60"
+      ],
+      "status": "draft_ocr_reviewed",
+      "ocr_confidence": "high",
+      "notes": [
+        "ชื่อเรียกสำหรับการค้นหาและ routing: กฎกระทรวงอุทธรณ์",
+        "เชื่อมโยงกับพระราชบัญญัติฯ มาตรา 114-119 และหนังสือเวียน ว 367 ลงวันที่ 25 มิถุนายน 2567",
+        "หลักแยกสำหรับการตีความ: มาตรา 115 และกฎกระทรวงฉบับนี้เป็นกรณีผู้ยื่นข้อเสนอมีสิทธิอุทธรณ์ตามมาตรา 114 แต่เรื่องที่ยกขึ้นอุทธรณ์เป็นเรื่องที่กฎหมายกำหนดให้อุทธรณ์ไม่ได้",
+        "แตกต่างจากหนังสือเวียน ว 367 ข้อ 2 ซึ่งเป็นกรณีบุคคลหรือสถานการณ์นั้นไม่เข้าข่ายที่จะใช้สิทธิอุทธรณ์ตามมาตรา 114 ตั้งแต่ต้น",
+        "ถอดข้อความจากภาพราชกิจจานุเบกษาจำนวน 3 หน้า",
+        "ปรับเลขไทยเป็นเลขอารบิกในหัวข้อและเนื้อหาเพื่อให้ค้นหาได้ง่าย โดยไม่เปลี่ยนสาระ"
+      ]
+    },
+    "chunk_count": 4
+  },
+  {
+    "source": "reference/circulars/circular-w367-2567.md",
+    "doc_type": "circular",
+    "metadata": {
+      "id": "circular-w367-2567",
+      "title_th": "ซ้อมความเข้าใจเกี่ยวกับการอุทธรณ์ตามพระราชบัญญัติการจัดซื้อจัดจ้างและการบริหารพัสดุภาครัฐ พ.ศ. 2560",
+      "title_en": "",
+      "aliases": [
+        "ว 367",
+        "หนังสือเวียน ว 367",
+        "หนังสือ ว 367"
+      ],
+      "document_type": "circular",
+      "jurisdiction": "Thailand",
+      "agency": "คณะกรรมการพิจารณาอุทธรณ์และข้อร้องเรียน กรมบัญชีกลาง",
+      "document_no": "กค (กอร) 0405.5/ว 367",
+      "year_be": "2567",
+      "year_ce": "2024",
+      "issued_date": "2024-06-25",
+      "effective_date": "2024-06-25",
+      "source_name": "หนังสือเวียน ว 367 ลงวันที่ 25 มิถุนายน 2567",
+      "source_type": "scanned_images",
+      "language": "th",
+      "tags": [
+        "procurement",
+        "circular",
+        "official-guidance",
+        "appeal",
+        "appeal-procedure"
+      ],
+      "topics": [
+        "การอุทธรณ์"
+      ],
+      "related_refs": [
+        "prb60",
+        "mr-appeal-exclusions-2568"
+      ],
+      "related_provisions": [
+        "ref: prb60"
+      ],
+      "supersedes": [
+        "กค (กอร) 0405.5/ว 374 ลงวันที่ 6 สิงหาคม 2563"
+      ],
+      "status": "draft_ocr_reviewed",
+      "ocr_confidence": "high",
+      "notes": [
+        "ถอดข้อความจากภาพหนังสือเวียนจำนวน 2 หน้า",
+        "ปรับเลขไทยเป็นเลขอารบิกในหัวข้อและเนื้อหาเพื่อให้ค้นหาได้ง่าย โดยไม่เปลี่ยนสาระ",
+        "เชื่อมโยงกับพระราชบัญญัติฯ มาตรา 114-119 และกฎกระทรวงอุทธรณ์ พ.ศ. 2568",
+        "หลักแยกสำหรับการตีความ: ว 367 ข้อ 2 เป็นกรณีบุคคลหรือสถานการณ์นั้นไม่เข้าข่ายที่จะใช้สิทธิอุทธรณ์ตามมาตรา 114 ตั้งแต่ต้น ไม่ใช่เพียงเรื่องที่อุทธรณ์ไม่ได้ตามมาตรา 115",
+        "คำว่าไม่มีสิทธิอุทธรณ์หมายถึงกรณีหรือการจัดซื้อจัดจ้างนั้น ไม่ใช่การตัดสิทธิบุคคลเป็นการทั่วไปหรือถาวร"
+      ]
+    },
+    "chunk_count": 9
+  },
+  {
+    "source": "reference/circulars/circular-w214-2563.md",
+    "doc_type": "circular",
+    "metadata": {
+      "id": "circular-w214-2563",
+      "title_th": "แนวทางปฏิบัติในการกำหนดคุณสมบัติของผู้ยื่นข้อเสนอ การกำหนดผลงาน การระบุคุณลักษณะเฉพาะของพัสดุหรือยี่ห้อของวัสดุ และการพิจารณาคุณสมบัติผู้ยื่นข้อเสนอของหน่วยงานของรัฐกรณีการกำหนดสิ่งที่ไม่ใช่สาระสำคัญ",
+      "title_en": "",
+      "aliases": [
+        "ว 214",
+        "หนังสือเวียน ว 214",
+        "หนังสือ ว 214"
+      ],
+      "document_type": "circular",
+      "jurisdiction": "Thailand",
+      "agency": "คณะกรรมการวินิจฉัยปัญหาการจัดซื้อจัดจ้างและการบริหารพัสดุภาครัฐ กรมบัญชีกลาง",
+      "document_no": "กค (กวจ) 0405.2/ว 214",
+      "year_be": "2563",
+      "year_ce": "2020",
+      "issued_date": "2020-05-18",
+      "effective_date": "2020-05-18",
+      "source_name": "หนังสือเวียน ว 214 ลงวันที่ 18 พฤษภาคม 2563",
+      "source_type": "scanned_images",
+      "language": "th",
+      "tags": [
+        "procurement",
+        "circular",
+        "official-guidance",
+        "bidder-qualification",
+        "past-performance",
+        "specification",
+        "non-material-error"
+      ],
+      "topics": [
+        "การกำหนดคุณสมบัติผู้ยื่นเสนอราคา",
+        "คุณสมบัติผู้ยื่นข้อเสนอ",
+        "การกำหนดผลงาน",
+        "คุณลักษณะเฉพาะ",
+        "ยี่ห้อวัสดุ",
+        "ข้อผิดพลาดที่ไม่ใช่สาระสำคัญ"
+      ],
+      "related_refs": [
+        "prb60"
+      ],
+      "related_provisions": [
+        "ref: prb60"
+      ],
+      "supersedes": [
+        "กค (กวจ) 0405.2/ว 521 ลงวันที่ 30 ตุลาคม 2562"
+      ],
+      "status": "draft_ocr_reviewed",
+      "ocr_confidence": "high",
+      "notes": [
+        "ถอดข้อความจากภาพหนังสือเวียนจำนวน 3 หน้า",
+        "ปรับเลขไทยเป็นเลขอารบิกในหัวข้อและเนื้อหาเพื่อให้ค้นหาได้ง่าย โดยไม่เปลี่ยนสาระ"
+      ]
+    },
+    "chunk_count": 16
   }
 ]

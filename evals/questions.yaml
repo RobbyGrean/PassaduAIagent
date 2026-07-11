@@ -13,3 +13,19 @@
 - id: prb-appeal
   question: การอุทธรณ์อยู่ใน พรบ มาตราใด
   expected_source: reference/law/prb60.md
+
+- id: circular-w214-bidder-qualification
+  question: การกำหนดคุณสมบัติผู้ยื่นเสนอราคาต้องดูอะไร
+  expected_source: reference/circulars/circular-w214-2563.md
+
+- id: ministerial-small-amount
+  question: วงเงินเล็กน้อยไม่ทำข้อตกลงเป็นหนังสือได้ไหม
+  expected_source: reference/law/ministerial-regulations/mr-specific-2560.md
+
+- id: ministerial-non-appealable
+  question: เรื่องที่อุทธรณ์ไม่ได้ตามกฎกระทรวงอุทธรณ์
+  expected_source: reference/law/ministerial-regulations/mr-appeal-exclusions-2568.md
+
+- id: circular-w367-no-standing
+  question: กรณีใดไม่เข้าข่ายที่จะใช้สิทธิอุทธรณ์ตามมาตรา 114
+  expected_source: reference/circulars/circular-w367-2567.md

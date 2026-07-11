@@ -7,7 +7,7 @@ from pathlib import Path
 from common import (
     CLAUSE_NUMBER_PATTERN,
     INDEX_ROOT,
-    LAW_FILES,
+    REFERENCE_FILES,
     compact_whitespace,
     read_text,
     repo_relative,
@@ -15,16 +15,35 @@ from common import (
 )
 
 
-SECTION_RE = re.compile(rf"^###\s+(มาตรา|ข้อ)\s+({CLAUSE_NUMBER_PATTERN})\b(.*)$")
-HEADING_RE = re.compile(r"^(#{1,2})\s+(.+)$")
+LEGAL_SECTION_RE = re.compile(rf"^###\s+(มาตรา|ข้อ)\s+({CLAUSE_NUMBER_PATTERN})\b(.*)$")
+NUMBERED_SECTION_RE = re.compile(r"^#{2,4}\s+(\d+(?:\.\d+)*\.?)\s*(.*)$")
+HEADING_RE = re.compile(r"^(#{1,4})\s+(.+)$")
 
 
-def doc_type_for(path: Path) -> str:
+def doc_type_for(path: Path, metadata: dict[str, object]) -> str:
+    if metadata.get("document_type"):
+        return str(metadata["document_type"])
     return "act" if path.name == "prb60.md" else "regulation"
 
 
-def parse_metadata(lines: list[str]) -> dict[str, str]:
-    metadata: dict[str, str] = {}
+def parse_metadata(lines: list[str]) -> dict[str, object]:
+    metadata: dict[str, object] = {}
+    if lines and lines[0].strip() == "---":
+        current_list: str | None = None
+        for line in lines[1:]:
+            if line.strip() == "---":
+                break
+            if line.startswith("  - ") and current_list:
+                values = metadata.setdefault(current_list, [])
+                assert isinstance(values, list)
+                values.append(line[4:].strip().strip('"'))
+                continue
+            if line and not line.startswith(" ") and ":" in line:
+                key, value = line.split(":", 1)
+                current_list = key.strip() if not value.strip() else None
+                metadata[key.strip()] = value.strip().strip('"') if value.strip() else []
+        return metadata
+
     in_metadata = False
     for line in lines:
         if line.strip() == "## Metadata":
@@ -43,7 +62,13 @@ def build_chunks_for_file(path: Path) -> tuple[dict[str, object], list[dict[str,
     lines = text.splitlines()
     metadata = parse_metadata(lines)
     source = repo_relative(path)
-    doc_type = doc_type_for(path)
+    doc_type = doc_type_for(path, metadata)
+    metadata_search = compact_whitespace(
+        " ".join(
+            str(value) if not isinstance(value, list) else " ".join(map(str, value))
+            for value in metadata.values()
+        )
+    )
     chunks: list[dict[str, object]] = []
     current: dict[str, object] | None = None
     current_lines: list[str] = []
@@ -61,6 +86,7 @@ def build_chunks_for_file(path: Path) -> tuple[dict[str, object], list[dict[str,
                     str(current.get("title", "")),
                     " ".join(current.get("heading_path", [])),
                     body,
+                    metadata_search,
                 ]
             )
         )
@@ -69,12 +95,19 @@ def build_chunks_for_file(path: Path) -> tuple[dict[str, object], list[dict[str,
         current_lines = []
 
     for line_no, line in enumerate(lines, start=1):
-        section_match = SECTION_RE.match(line.strip())
+        legal_match = LEGAL_SECTION_RE.match(line.strip())
+        numbered_match = NUMBERED_SECTION_RE.match(line.strip())
         heading_match = HEADING_RE.match(line.strip())
 
-        if section_match:
+        if legal_match or numbered_match:
             flush()
-            clause_type, clause_no, title_tail = section_match.groups()
+            if legal_match:
+                clause_type, clause_no, title_tail = legal_match.groups()
+            else:
+                assert numbered_match is not None
+                clause_no, title_tail = numbered_match.groups()
+                clause_type = "หัวข้อ"
+                clause_no = clause_no.rstrip(".")
             current = {
                 "id": f"{path.stem}-{clause_type}-{clause_no}",
                 "source": source,
@@ -89,12 +122,10 @@ def build_chunks_for_file(path: Path) -> tuple[dict[str, object], list[dict[str,
                 current_lines.append(title_tail.strip())
             continue
 
-        if heading_match and not section_match:
+        if heading_match and not legal_match and not numbered_match:
             level, title = heading_match.groups()
-            if level == "#":
-                heading_path = [title.strip()]
-            elif level == "##":
-                heading_path = heading_path[:1] + [title.strip()]
+            depth = len(level)
+            heading_path = heading_path[: depth - 1] + [title.strip()]
 
         if current is not None:
             current_lines.append(line)
@@ -112,7 +143,7 @@ def build_chunks_for_file(path: Path) -> tuple[dict[str, object], list[dict[str,
 def build_index() -> dict[str, object]:
     documents = []
     chunks = []
-    for path in LAW_FILES.values():
+    for path in REFERENCE_FILES.values():
         document, file_chunks = build_chunks_for_file(path)
         documents.append(document)
         chunks.extend(file_chunks)
@@ -146,6 +177,15 @@ def build_index() -> dict[str, object]:
         "ตรวจรับ": ["reference/law/prb60.md", "reference/law/rbb60.md"],
         "บริหารสัญญา": ["reference/law/prb60.md", "reference/law/rbb60.md"],
         "บริหารพัสดุ": ["reference/law/prb60.md", "reference/law/rbb60.md"],
+        "ว 214": ["reference/circulars/circular-w214-2563.md"],
+        "คุณสมบัติผู้ยื่นเสนอราคา": ["reference/circulars/circular-w214-2563.md"],
+        "กฎกระทรวงเจาะจง": ["reference/law/ministerial-regulations/mr-specific-2560.md"],
+        "วงเงินเล็กน้อย": ["reference/law/ministerial-regulations/mr-specific-2560.md"],
+        "ไม่ทำข้อตกลงเป็นหนังสือ": ["reference/law/ministerial-regulations/mr-specific-2560.md"],
+        "กรรมการตรวจรับคนเดียว": ["reference/law/ministerial-regulations/mr-specific-2560.md"],
+        "กฎกระทรวงอุทธรณ์": ["reference/law/ministerial-regulations/mr-appeal-exclusions-2568.md"],
+        "ว 367": ["reference/circulars/circular-w367-2567.md"],
+        "ไม่เข้าข่ายที่จะใช้สิทธิอุทธรณ์": ["reference/circulars/circular-w367-2567.md", "reference/law/prb60.md"],
     }
     keyword_routes = topic_routes.copy()
 

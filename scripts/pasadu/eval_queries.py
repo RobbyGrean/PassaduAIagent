@@ -31,6 +31,22 @@ CASES = [
         "query": "สัญญาต้องทำตามระเบียบข้อใด",
         "expected_source": "reference/law/rbb60.md",
     },
+    {
+        "query": "การกำหนดคุณสมบัติผู้ยื่นเสนอราคาต้องดูอะไร",
+        "expected_source": "reference/circulars/circular-w214-2563.md",
+    },
+    {
+        "query": "วงเงินเล็กน้อยไม่ทำข้อตกลงเป็นหนังสือได้ไหม",
+        "expected_source": "reference/law/ministerial-regulations/mr-specific-2560.md",
+    },
+    {
+        "query": "เรื่องที่อุทธรณ์ไม่ได้ตามกฎกระทรวงอุทธรณ์",
+        "expected_source": "reference/law/ministerial-regulations/mr-appeal-exclusions-2568.md",
+    },
+    {
+        "query": "กรณีใดไม่เข้าข่ายที่จะใช้สิทธิอุทธรณ์ตามมาตรา 114",
+        "expected_source": "reference/circulars/circular-w367-2567.md",
+    },
 ]
 
 

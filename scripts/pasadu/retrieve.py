@@ -5,7 +5,7 @@ import json
 import math
 import re
 
-from common import CLAUSE_NUMBER_PATTERN, INDEX_ROOT, normalize_digits, read_json, tokenize
+from common import INDEX_ROOT, REFERENCE_SECTION_NUMBER_PATTERN, normalize_digits, read_json, tokenize
 from route_query import route_query
 
 
@@ -40,11 +40,21 @@ DOMAIN_KEYWORDS = [
     "การระงับการทำสัญญา",
     "อันตรายสาหัส",
     "ทรัพย์สินเสียหาย",
+    "ว 214",
+    "คุณสมบัติผู้ยื่นเสนอราคา",
+    "คุณสมบัติผู้ยื่นข้อเสนอ",
+    "กฎกระทรวงเจาะจง",
+    "วงเงินเล็กน้อย",
+    "ไม่ทำข้อตกลงเป็นหนังสือ",
+    "กรรมการตรวจรับคนเดียว",
+    "กฎกระทรวงอุทธรณ์",
+    "ว 367",
+    "ไม่เข้าข่ายที่จะใช้สิทธิอุทธรณ์",
 ]
 
 
 def requested_clause(query: str) -> tuple[str, str] | None:
-    match = re.search(rf"(มาตรา|ข้อ)\s*({CLAUSE_NUMBER_PATTERN})", query)
+    match = re.search(rf"(มาตรา|ข้อ|หัวข้อ)\s*({REFERENCE_SECTION_NUMBER_PATTERN})", query)
     if not match:
         return None
     label, number = match.groups()
@@ -87,6 +97,31 @@ def score_chunk(query_tokens: list[str], chunk: dict[str, object]) -> float:
                 score += 6.0
             if keyword_lower in heading:
                 score += 4.0
+    if (
+        "อุทธรณ์" in query_joined
+        and chunk.get("source") == "reference/law/prb60.md"
+        and normalize_digits(str(chunk.get("clause_no", ""))) in {"114", "115", "116", "117", "118", "119"}
+    ):
+        score += 20.0
+    if (
+        any(keyword in query_joined for keyword in ["เฉพาะเจาะจง", "เจาะจง"])
+        and chunk.get("source") == "reference/law/prb60.md"
+        and normalize_digits(str(chunk.get("clause_no", ""))) == "56"
+    ):
+        score += 20.0
+    source = chunk.get("source")
+    clause_no = normalize_digits(str(chunk.get("clause_no", "")))
+    if source == "reference/law/ministerial-regulations/mr-specific-2560.md":
+        if "ไม่ทำข้อตกลงเป็นหนังสือ" in query_joined and clause_no == "4":
+            score += 20.0
+        if any(keyword in query_joined for keyword in ["กรรมการตรวจรับคนเดียว", "ผู้ตรวจรับพัสดุคนเดียว"]) and clause_no == "5":
+            score += 20.0
+    if (
+        source == "reference/law/ministerial-regulations/mr-appeal-exclusions-2568.md"
+        and any(keyword in query_joined for keyword in ["อุทธรณ์ไม่ได้", "กฎกระทรวงอุทธรณ์"])
+        and clause_no == "3"
+    ):
+        score += 20.0
     return score
 
 
@@ -107,8 +142,9 @@ def search_chunks(
             if chunk.get("clause_type") == label
             and normalize_digits(str(chunk.get("clause_no"))) == number
         ]
-        if direct:
-            return direct[:limit]
+        primary_direct = [chunk for chunk in direct if chunk.get("source") == sources[0]]
+        if primary_direct:
+            return primary_direct[:limit]
 
     query_tokens = tokenize(query)
     scored = [
@@ -118,7 +154,7 @@ def search_chunks(
     scored.sort(key=lambda item: item[0], reverse=True)
     results = []
     for score, chunk in scored:
-        if score <= 0 and results:
+        if score <= 0:
             continue
         item = dict(chunk)
         item["score"] = round(score, 3)
@@ -128,16 +164,47 @@ def search_chunks(
     return results
 
 
+def search_routed_sources(
+    query: str,
+    chunks: list[dict[str, object]],
+    sources: list[str],
+    limit: int,
+) -> list[dict[str, object]]:
+    if len(sources) <= 1:
+        return search_chunks(query, chunks, sources, limit)
+
+    results: list[dict[str, object]] = []
+    seen: set[tuple[object, object]] = set()
+    for source in sources:
+        source_results = search_chunks(query, chunks, [source], limit)
+        if not source_results:
+            continue
+        item = source_results[0]
+        key = (item.get("source"), item.get("id"))
+        seen.add(key)
+        results.append(item)
+
+    for item in search_chunks(query, chunks, sources, limit):
+        key = (item.get("source"), item.get("id"))
+        if key in seen:
+            continue
+        results.append(item)
+        seen.add(key)
+        if len(results) >= limit:
+            break
+    return results[:limit]
+
+
 def retrieve(query: str, limit: int = 5) -> dict[str, object]:
     route = route_query(query)
     chunks = read_json(INDEX_ROOT / "chunks.json")
     assert isinstance(chunks, list)
 
-    results = search_chunks(query, chunks, route["sources"], limit)
+    results = search_routed_sources(query, chunks, route["sources"], limit)
     used_fallback = False
     has_positive_score = any(float(item.get("score", 1)) > 0 for item in results)
     if (not results or not has_positive_score) and route.get("fallback_sources"):
-        fallback_results = search_chunks(query, chunks, route["fallback_sources"], limit)
+        fallback_results = search_routed_sources(query, chunks, route["fallback_sources"], limit)
         fallback_positive = any(float(item.get("score", 1)) > 0 for item in fallback_results)
         if fallback_results and fallback_positive:
             results = fallback_results

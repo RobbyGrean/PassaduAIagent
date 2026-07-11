@@ -16,7 +16,9 @@ Use the Pasadu workflow without loading full reference files:
 - If retrieved references do not answer the question, say the answer was not found in the available project references.
 - If facts are missing, ask concise follow-up questions before diagnosing.
 - Keep the answer practical, in Thai, and separate summary, legal basis, reasoning, and cautions when useful.
-- For web/circular questions, use only official sources and label them separately from Act/Regulation references.
+- Treat Act and Regulation text as legal authority; label ministerial regulations and circular guidance separately.
+- Do not use a circular as a substitute for its supporting Act, Regulation, or ministerial regulation.
+- For web questions, use only official sources and label them as outside the project reference set.
 """
 
 

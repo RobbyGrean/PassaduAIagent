@@ -107,6 +107,10 @@ PRB_FIRST_CONTRACT_KEYWORDS = [
 SOURCE_PRB = "reference/law/prb60.md"
 SOURCE_RBB = "reference/law/rbb60.md"
 SOURCE_RBB3 = "reference/law/rbb60-3.md"
+SOURCE_MR_SPECIFIC = "reference/law/ministerial-regulations/mr-specific-2560.md"
+SOURCE_MR_APPEAL = "reference/law/ministerial-regulations/mr-appeal-exclusions-2568.md"
+SOURCE_W367 = "reference/circulars/circular-w367-2567.md"
+SOURCE_W214 = "reference/circulars/circular-w214-2563.md"
 
 
 def has_clause_reference(query: str, label: str) -> bool:
@@ -120,7 +124,18 @@ def is_rbb3_clause_reference(query: str) -> bool:
 
 def route_query(query: str) -> dict[str, object]:
     q = query.lower()
-    scores = {SOURCE_PRB: 0, SOURCE_RBB: 0, SOURCE_RBB3: 0}
+    scores = {
+        source: 0
+        for source in [
+            SOURCE_PRB,
+            SOURCE_RBB,
+            SOURCE_RBB3,
+            SOURCE_MR_SPECIFIC,
+            SOURCE_MR_APPEAL,
+            SOURCE_W367,
+            SOURCE_W214,
+        ]
+    }
     reasons: list[str] = []
     fallback_sources: list[str] = []
     scope_questions = [
@@ -203,7 +218,78 @@ def route_query(query: str) -> dict[str, object]:
     explicit_rbb3 = has_rbb3_direct or has_rbb3_damage_context or has_rbb3_scope_context
     construction_only = "งานก่อสร้าง" in q and not explicit_rbb3 and not needs_rbb3_scope_check
 
-    if needs_rbb3_scope_check:
+    asks_w214 = any(
+        keyword in q
+        for keyword in [
+            "ว 214",
+            "ว214",
+            "หนังสือเวียน ว 214",
+            "คุณสมบัติผู้ยื่นเสนอราคา",
+            "คุณสมบัติของผู้ยื่นเสนอราคา",
+            "คุณสมบัติผู้ยื่นข้อเสนอ",
+            "คุณสมบัติของผู้ยื่นข้อเสนอ",
+        ]
+    )
+    asks_specific_method = (
+        any(keyword in q for keyword in ["กฎกระทรวงเจาะจง", "กฎกระทรวงวงเงินเล็กน้อย"])
+        or "เฉพาะเจาะจง" in q
+        or "เจาะจง" in q
+        or any(
+            keyword in q
+            for keyword in [
+                "วงเงินเล็กน้อยตามกฎกระทรวง",
+                "วงเงินเล็กน้อย",
+                "ไม่ทำข้อตกลงเป็นหนังสือ",
+                "ไม่ทําข้อตกลงเป็นหนังสือ",
+                "กรรมการตรวจรับคนเดียว",
+                "ผู้ตรวจรับพัสดุคนเดียว",
+            ]
+        )
+    )
+    asks_w367 = any(
+        keyword in q
+        for keyword in [
+            "ว 367",
+            "ว367",
+            "หนังสือเวียน ว 367",
+            "ไม่เข้าข่ายที่จะใช้สิทธิอุทธรณ์",
+            "ไม่เข้าข่ายใช้สิทธิอุทธรณ์",
+        ]
+    )
+    asks_mr_appeal = any(
+        keyword in q
+        for keyword in [
+            "กฎกระทรวงอุทธรณ์",
+            "กฎกระทรวงกำหนดเรื่องการจัดซื้อจัดจ้างกับหน่วยงานของรัฐที่ใช้สิทธิอุทธรณ์ไม่ได้",
+            "เรื่องที่อุทธรณ์ไม่ได้",
+        ]
+    )
+    asks_appeal = (
+        "อุทธรณ์" in q
+        or bool(re.search(r"มาตรา\s*(?:11[4-9])(?:\s*[-–]\s*11[4-9])?", normalize_digits(query)))
+    )
+
+    if asks_w214:
+        selected = [SOURCE_W214]
+        fallback_sources = [SOURCE_RBB, SOURCE_PRB]
+        reasons.append("คำถามเจาะหนังสือเวียน ว 214 หรือการกำหนดคุณสมบัติผู้ยื่นเสนอราคา")
+    elif asks_specific_method:
+        selected = [SOURCE_PRB, SOURCE_MR_SPECIFIC, SOURCE_RBB]
+        fallback_sources = []
+        reasons.append("คำถามเรื่องวิธีเฉพาะเจาะจง ต้องอ่าน พ.ร.บ. มาตรา 56 แล้วกฎกระทรวงวงเงิน และระเบียบตามลำดับ")
+    elif asks_w367:
+        selected = [SOURCE_W367, SOURCE_PRB]
+        fallback_sources = [SOURCE_MR_APPEAL]
+        reasons.append("คำถามเจาะ ว 367 หรือกรณีไม่เข้าข่ายใช้สิทธิอุทธรณ์ตามมาตรา 114")
+    elif asks_mr_appeal:
+        selected = [SOURCE_MR_APPEAL, SOURCE_PRB]
+        fallback_sources = [SOURCE_W367]
+        reasons.append("คำถามเจาะกฎกระทรวงอุทธรณ์หรือเรื่องที่อุทธรณ์ไม่ได้ตามมาตรา 115")
+    elif asks_appeal:
+        selected = [SOURCE_PRB, SOURCE_MR_APPEAL, SOURCE_W367]
+        fallback_sources = [SOURCE_RBB]
+        reasons.append("คำถามเรื่องการอุทธรณ์ ต้องอ่านมาตรา 114-119 พร้อมกฎกระทรวงอุทธรณ์และ ว 367")
+    elif needs_rbb3_scope_check:
         selected = [SOURCE_RBB]
         fallback_sources = [SOURCE_PRB]
         reasons.append("คำถามเกี่ยวกับการประเมินผู้ประกอบการงานก่อสร้าง แต่ยังไม่ทราบว่าเข้า scope ระเบียบฉบับที่ 3 จึงควรถาม scope gate ก่อน")

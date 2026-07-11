@@ -86,5 +86,33 @@
   "บริหารพัสดุ": [
     "reference/law/prb60.md",
     "reference/law/rbb60.md"
+  ],
+  "ว 214": [
+    "reference/circulars/circular-w214-2563.md"
+  ],
+  "คุณสมบัติผู้ยื่นเสนอราคา": [
+    "reference/circulars/circular-w214-2563.md"
+  ],
+  "กฎกระทรวงเจาะจง": [
+    "reference/law/ministerial-regulations/mr-specific-2560.md"
+  ],
+  "วงเงินเล็กน้อย": [
+    "reference/law/ministerial-regulations/mr-specific-2560.md"
+  ],
+  "ไม่ทำข้อตกลงเป็นหนังสือ": [
+    "reference/law/ministerial-regulations/mr-specific-2560.md"
+  ],
+  "กรรมการตรวจรับคนเดียว": [
+    "reference/law/ministerial-regulations/mr-specific-2560.md"
+  ],
+  "กฎกระทรวงอุทธรณ์": [
+    "reference/law/ministerial-regulations/mr-appeal-exclusions-2568.md"
+  ],
+  "ว 367": [
+    "reference/circulars/circular-w367-2567.md"
+  ],
+  "ไม่เข้าข่ายที่จะใช้สิทธิอุทธรณ์": [
+    "reference/circulars/circular-w367-2567.md",
+    "reference/law/prb60.md"
   ]
 }
