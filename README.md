@@ -22,6 +22,28 @@ answer_context.py ─ สร้าง context พร้อม guardrails
 คำตอบพร้อม citation ที่ตรวจด้วย cite_check.py
 ```
 
+### Multi-agent orchestration
+
+Pasadu ใช้ root session เป็น orchestrator และเลือกเส้นทางที่ประหยัดที่สุดตามลักษณะงาน:
+
+```text
+คำถาม
+  → legal-retriever: ค้นและคัดหลักฐานโดยไม่ตีความ
+  → คำถามตรง: root orchestrator เรียบเรียงคำตอบ
+  → ต้องวิเคราะห์: legal-analyst
+  → ขัดแย้ง/กำกวม/หลายตัวบท: legal-analyst-complex
+  → cite_check.py
+  → คำตอบสุดท้าย
+```
+
+| Platform | Root orchestrator | Retriever | Analyst | Complex analyst |
+| --- | --- | --- | --- | --- |
+| Codex | GPT-5.6 Terra, medium | GPT-5.6 Luna, low | GPT-5.6 Luna, high | GPT-5.6 Luna, high |
+| Claude Code | โมเดลของผู้ใช้, medium | `inherit`, low | `inherit`, high | `inherit`, high |
+| Gemini CLI | โมเดลของผู้ใช้ | `inherit` | `inherit` + prompt ให้ reasoning อย่างรอบคอบ | `inherit` + prompt เชิงซับซ้อน |
+
+ชื่อโมเดล Codex เป็น adapter ของรุ่นปัจจุบัน ส่วน Claude/Gemini ตั้งใจใช้ `inherit` เพื่อรองรับโมเดลที่ผู้ใช้มี หาก native subagents ใช้งานไม่ได้ ระบบยังทำ workflow เดิมใน main session ได้จาก `SKILL.md` และไฟล์คำสั่งประจำแพลตฟอร์ม
+
 ระบบยึดลำดับเอกสารดังนี้:
 
 1. พระราชบัญญัติ: หลักกฎหมายและอำนาจ
@@ -67,6 +89,14 @@ answer_context.py ─ สร้าง context พร้อม guardrails
 PassaduAIagent/
 ├─ SKILL.md
 ├─ pasadu.md
+├─ AGENTS.md
+├─ CLAUDE.md
+├─ GEMINI.md
+├─ .codex/
+│  ├─ config.toml
+│  └─ agents/
+├─ .claude/agents/
+├─ .gemini/agents/
 ├─ reference/
 │  ├─ law/
 │  │  ├─ prb60.md

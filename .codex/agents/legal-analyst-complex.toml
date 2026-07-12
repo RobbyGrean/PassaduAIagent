@@ -1,7 +1,7 @@
 name = "legal_analyst_complex"
 description = "Read-only Pasadu analyst for complex legal diagnosis. Use only after legal_retriever when the issue requires reconciling multiple authorities, resolving material ambiguity or conflict, or tracing a difficult fact-to-law chain."
-model = "gpt-5.6-sol"
-model_reasoning_effort = "medium"
+model = "gpt-5.6-luna"
+model_reasoning_effort = "high"
 sandbox_mode = "read-only"
 
 developer_instructions = """
