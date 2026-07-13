@@ -1,7 +1,6 @@
-# Keep ordinary repository maintenance (sync, tests, commit, and push) light.
-# Use the `pasadu-legal` profile for the Phase 1 legal orchestrator.
-model = "gpt-5.6-luna"
-model_reasoning_effort = "low"
+# Leave the project default unpinned so new chats use the global model and
+# reasoning settings selected by the user or Codex.
+# Use the `pasadu-legal` profile explicitly for the Phase 1 legal orchestrator.
 
 [agents]
 max_threads = 4
@@ -12,6 +11,3 @@ interrupt_message = true
 model = "gpt-5.6-terra"
 model_reasoning_effort = "medium"
 
-[profiles.pasadu-sync]
-model = "gpt-5.6-luna"
-model_reasoning_effort = "low"
