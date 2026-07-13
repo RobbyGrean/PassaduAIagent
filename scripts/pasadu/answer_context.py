@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import argparse
 
-from common import REPO_ROOT, read_text
+from common import REPO_ROOT, display_source, format_citation, read_text
 from retrieve import retrieve
 
 
@@ -12,11 +12,13 @@ Use the Pasadu workflow without loading full reference files:
 - Use only the retrieved references below as legal basis for the answer.
 - Do not answer from memory alone.
 - Do not invent law, clause numbers, circulars, or official rulings.
-- Cite each legal basis as source + clause type + clause number.
+- Cite each legal basis as the human-readable legal authority name + clause type + clause number.
+- Never expose repository filenames in the answer. Those paths are internal retrieval metadata only.
 - If retrieved references do not answer the question, say the answer was not found in the available project references.
 - If facts are missing, ask concise follow-up questions before diagnosing.
 - Keep the answer practical, in Thai, and separate summary, legal basis, reasoning, and cautions when useful.
 - Treat Act and Regulation text as legal authority; label ministerial regulations and circular guidance separately.
+- Apply the authority hierarchy: the Act supplies the legal power and scope, the Regulation supplies operating steps, ministerial regulations supply subordinate rules, and circulars are supporting guidance. If sources differ, explain the relationship and do not let a lower-level source silently override a higher-level one.
 - Do not use a circular as a substitute for its supporting Act, Regulation, or ministerial regulation.
 - For web questions, use only official sources and label them as outside the project reference set.
 """
@@ -38,8 +40,8 @@ def build_context(query: str, limit: int = 5, full_rules: bool = False) -> str:
         rules,
         "",
         "## Route",
-        f"sources: {', '.join(retrieved['route'].get('sources', []))}",
-        f"fallback_sources: {', '.join(retrieved['route'].get('fallback_sources', []))}",
+        f"authorities: {', '.join(display_source(source) for source in retrieved['route'].get('sources', []))}",
+        f"fallback_authorities: {', '.join(display_source(source) for source in retrieved['route'].get('fallback_sources', []))}",
         f"used_fallback: {retrieved['route'].get('used_fallback', False)}",
         "",
         "## User Question",
@@ -48,7 +50,7 @@ def build_context(query: str, limit: int = 5, full_rules: bool = False) -> str:
         "## Retrieved References",
     ]
     for chunk in retrieved["results"]:
-        citation = f"{chunk['source']} {chunk['clause_type']} {chunk['clause_no']}"
+        citation = format_citation(chunk["source"], chunk["clause_type"], chunk["clause_no"])
         lines.extend(
             [
                 "",
@@ -62,7 +64,7 @@ def build_context(query: str, limit: int = 5, full_rules: bool = False) -> str:
         [
             "",
             "## Output Guardrail",
-            "ตอบโดยใช้เฉพาะ Retrieved References ข้างต้น ถ้าไม่พบตัวบทที่ตอบคำถาม ให้ตอบว่าไม่พบในไฟล์อ้างอิงที่มี",
+            "ตอบโดยใช้เฉพาะ Retrieved References ข้างต้น ถ้าไม่พบตัวบทที่ตอบคำถาม ให้ตอบว่าไม่พบในชุดกฎหมายและเอกสารอ้างอิงของโครงการ",
         ]
     )
     return "\n".join(lines)

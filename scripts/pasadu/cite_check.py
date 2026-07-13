@@ -4,13 +4,28 @@ import argparse
 import json
 import re
 
-from common import INDEX_ROOT, REFERENCE_SECTION_NUMBER_PATTERN, normalize_digits, read_json, read_text
+from common import (
+    INDEX_ROOT,
+    REFERENCE_SECTION_NUMBER_PATTERN,
+    SOURCE_DISPLAY_NAMES,
+    normalize_digits,
+    read_json,
+    read_text,
+)
 
 
 CITATION_RE = re.compile(
     rf"(reference/(?:law(?:/ministerial-regulations)?|circulars)/[a-z0-9-]+\.md)"
     rf"\s+(มาตรา|ข้อ|หัวข้อ)\s*({REFERENCE_SECTION_NUMBER_PATTERN})"
 )
+HUMAN_SOURCE_RE = "|".join(
+    re.escape(label)
+    for label in sorted(SOURCE_DISPLAY_NAMES.values(), key=len, reverse=True)
+)
+HUMAN_CITATION_RE = re.compile(
+    rf"({HUMAN_SOURCE_RE})\s+(มาตรา|ข้อ|หัวข้อ)\s*({REFERENCE_SECTION_NUMBER_PATTERN})"
+)
+DISPLAY_TO_SOURCE = {label: source for source, label in SOURCE_DISPLAY_NAMES.items()}
 
 
 def load_valid_citations() -> set[tuple[str, str, str]]:
@@ -28,10 +43,15 @@ def load_valid_citations() -> set[tuple[str, str, str]]:
 
 def check_citations(answer: str) -> dict[str, object]:
     valid = load_valid_citations()
-    found = [
+    path_citations = [
         (source, clause_type, normalize_digits(number))
         for source, clause_type, number in CITATION_RE.findall(answer)
     ]
+    human_citations = [
+        (DISPLAY_TO_SOURCE[label], clause_type, normalize_digits(number))
+        for label, clause_type, number in HUMAN_CITATION_RE.findall(answer)
+    ]
+    found = path_citations + human_citations
     invalid = [citation for citation in found if citation not in valid]
     return {
         "ok": bool(found) and not invalid,

@@ -5,7 +5,15 @@ import json
 import math
 import re
 
-from common import INDEX_ROOT, REFERENCE_SECTION_NUMBER_PATTERN, normalize_digits, read_json, tokenize
+from common import (
+    INDEX_ROOT,
+    REFERENCE_SECTION_NUMBER_PATTERN,
+    display_source,
+    format_citation,
+    normalize_digits,
+    read_json,
+    tokenize,
+)
 from route_query import route_query
 
 
@@ -229,16 +237,16 @@ def main() -> None:
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return
 
-    print("Routed sources:")
+    print("Routed authorities:")
     for source in result["route"]["sources"]:
-        print(f"- {source}")
+        print(f"- {display_source(source)}")
     if result["route"].get("used_fallback"):
-        print("Used fallback sources:")
+        print("Used fallback authorities:")
         for source in result["route"].get("fallback_sources", []):
-            print(f"- {source}")
+            print(f"- {display_source(source)}")
     print("\nResults:")
     for chunk in result["results"]:
-        citation = f"{chunk['source']} {chunk['clause_type']} {chunk['clause_no']}"
+        citation = format_citation(chunk["source"], chunk["clause_type"], chunk["clause_no"])
         print(f"- {citation} (score: {chunk.get('score', 'direct')})")
         snippet = str(chunk.get("text", "")).replace("\n", " ")
         print(f"  {snippet[:240]}")

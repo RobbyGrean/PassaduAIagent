@@ -9,6 +9,8 @@ sys.path.insert(0, str(SCRIPT_DIR))
 
 from build_index import build_index
 from cite_check import check_citations
+from common import format_citation
+from answer_context import build_context
 from retrieve import retrieve
 from route_query import route_query
 
@@ -115,6 +117,11 @@ class PasaduScriptTests(unittest.TestCase):
     def test_route_explicit_regulation_overrides_contract_exception(self):
         result = route_query("ระเบียบข้อไหนพูดถึงการแก้ไขสัญญา")
         self.assertEqual(result["sources"], ["reference/law/rbb60.md"])
+
+    def test_route_explicit_act_and_regulation_keeps_both_authorities(self):
+        result = route_query("ตาม พ.ร.บ. มาตรา 93 และระเบียบข้อ 182 ต้องทำอย่างไร")
+        self.assertEqual(result["sources"], ["reference/law/prb60.md", "reference/law/rbb60.md"])
+        self.assertEqual(result["fallback_sources"], [])
 
     def test_route_rbb3_direct_clause(self):
         result = route_query("ข้อ 190/3 ประเมินอะไร")
@@ -226,6 +233,26 @@ class PasaduScriptTests(unittest.TestCase):
     def test_cite_check_accepts_existing_citation(self):
         result = check_citations("อ้างอิง: reference/law/prb60.md มาตรา 56")
         self.assertTrue(result["ok"])
+
+    def test_cite_check_accepts_human_readable_authority_citation(self):
+        result = check_citations(
+            "อ้างอิง: พระราชบัญญัติการจัดซื้อจัดจ้างและการบริหารพัสดุภาครัฐ พ.ศ. 2560 มาตรา 56"
+        )
+        self.assertTrue(result["ok"])
+
+    def test_format_citation_hides_internal_filename(self):
+        citation = format_citation("reference/law/rbb60.md", "ข้อ", "78")
+        self.assertEqual(
+            citation,
+            "ระเบียบกระทรวงการคลังว่าด้วยการจัดซื้อจัดจ้างและการบริหารพัสดุภาครัฐ พ.ศ. 2560 ข้อ 78",
+        )
+        self.assertNotIn("rbb60.md", citation)
+
+    def test_answer_context_uses_authority_names(self):
+        context = build_context("มาตรา 56 กล่าวถึงอะไร", limit=1)
+        self.assertIn("authorities:", context)
+        self.assertIn("พระราชบัญญัติการจัดซื้อจัดจ้างและการบริหารพัสดุภาครัฐ พ.ศ. 2560 มาตรา 56", context)
+        self.assertNotIn("reference/law/prb60.md มาตรา 56", context)
 
     def test_cite_check_accepts_rbb3_fraction_clause(self):
         result = check_citations("อ้างอิง: reference/law/rbb60-3.md ข้อ 190/3")

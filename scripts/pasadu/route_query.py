@@ -4,7 +4,7 @@ import argparse
 import json
 import re
 
-from common import INDEX_ROOT, normalize_digits, read_json
+from common import INDEX_ROOT, display_source, normalize_digits, read_json
 
 
 PRB_KEYWORDS = [
@@ -296,15 +296,19 @@ def route_query(query: str) -> dict[str, object]:
     elif explicit_rbb3:
         selected = [SOURCE_RBB3]
         fallback_sources = [SOURCE_RBB, SOURCE_PRB]
-        reasons.append("คำถามชี้ไปที่ระเบียบฉบับที่ 3/ข้อ 190-191/คะแนนความเสียหาย จึงค้น rbb60-3.md ก่อน")
+        reasons.append("คำถามชี้ไปที่ระเบียบฉบับที่ 3/ข้อ 190-191/คะแนนความเสียหาย จึงค้นระเบียบฉบับที่ 3 ก่อน")
     elif construction_only:
         selected = [SOURCE_RBB]
         fallback_sources = [SOURCE_PRB]
-        reasons.append("พบคำว่างานก่อสร้าง แต่ยังไม่มีบริบทระเบียบฉบับที่ 3/ข้อ 190-191/คะแนนความเสียหาย จึงไม่ route ไป rbb60-3.md")
+        reasons.append("พบคำว่างานก่อสร้าง แต่ยังไม่มีบริบทระเบียบฉบับที่ 3/ข้อ 190-191/คะแนนความเสียหาย จึงยังไม่ route ไปกฎเกณฑ์การประเมินตามระเบียบฉบับที่ 3")
     elif explicit_prb and not explicit_rbb:
         selected = [SOURCE_PRB]
         fallback_sources = [SOURCE_RBB]
         reasons.append("ผู้ใช้ถามเจาะไปที่ พ.ร.บ./มาตรา จึงค้น พ.ร.บ. ก่อน")
+    elif explicit_prb and explicit_rbb:
+        selected = [SOURCE_PRB, SOURCE_RBB]
+        fallback_sources = []
+        reasons.append("ผู้ใช้ระบุทั้ง พ.ร.บ./มาตรา และระเบียบ/ข้อ จึงค้นฐานอำนาจและวิธีปฏิบัติร่วมกัน")
     elif explicit_rbb and not explicit_prb:
         selected = [SOURCE_RBB]
         fallback_sources = [SOURCE_PRB]
@@ -346,9 +350,9 @@ def main() -> None:
     if args.json:
         print(json.dumps(result, ensure_ascii=False, indent=2))
     else:
-        print("Sources:")
+        print("Authorities:")
         for source in result["sources"]:
-            print(f"- {source}")
+            print(f"- {display_source(source)}")
         print("Reasons:")
         for reason in result["reasons"]:
             print(f"- {reason}")

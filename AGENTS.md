@@ -15,6 +15,8 @@ These instructions apply only when the user asks a substantive question about Th
 6. Before answering the user, run `python -B scripts/pasadu/cite_check.py` against the drafted answer. Remove or correct every citation that fails.
 7. Produce the final answer using the formats and guardrails in `SKILL.md` and `pasadu.md`.
 
+Citation presentation rule: internal repository paths may be used in evidence packets and by `cite_check.py`, but the final user-facing answer must translate each path into the human-readable Act, Regulation, ministerial regulation, or circular name and cite the exact section, clause, or heading number. Never expose filenames such as `prb60.md` or `rbb60.md` as the citation.
+
 ## Phase 1 limits
 
 - The legal workflow is read-only.

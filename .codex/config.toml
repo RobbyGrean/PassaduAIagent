@@ -1,7 +1,17 @@
-model = "gpt-5.6-terra"
-model_reasoning_effort = "medium"
+# Keep ordinary repository maintenance (sync, tests, commit, and push) light.
+# Use the `pasadu-legal` profile for the Phase 1 legal orchestrator.
+model = "gpt-5.6-luna"
+model_reasoning_effort = "low"
 
 [agents]
 max_threads = 4
 max_depth = 1
 interrupt_message = true
+
+[profiles.pasadu-legal]
+model = "gpt-5.6-terra"
+model_reasoning_effort = "medium"
+
+[profiles.pasadu-sync]
+model = "gpt-5.6-luna"
+model_reasoning_effort = "low"

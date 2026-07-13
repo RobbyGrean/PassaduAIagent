@@ -130,7 +130,7 @@ python scripts\pasadu\build_index.py
 python scripts\pasadu\route_query.py "วงเงินเล็กน้อยไม่ทำข้อตกลงเป็นหนังสือได้ไหม" --json
 python scripts\pasadu\retrieve.py "ว 214 กำหนดคุณสมบัติผู้ยื่นเสนอราคาอย่างไร" --limit 5
 python scripts\pasadu\answer_context.py "เรื่องใดอุทธรณ์ไม่ได้"
-python scripts\pasadu\cite_check.py --text "อ้างอิง: reference/circulars/circular-w214-2563.md หัวข้อ 1.1.2"
+python scripts\pasadu\cite_check.py --text "อ้างอิง: หนังสือเวียน ว 214 ลงวันที่ 18 พฤษภาคม 2563 หัวข้อ 1.1.2"
 ```
 
 รัน verification suite:
@@ -156,12 +156,14 @@ python scripts\pasadu\eval_queries.py
 ## Citation Format
 
 ```text
-reference/law/prb60.md มาตรา 114
-reference/law/rbb60.md ข้อ 78
-reference/law/rbb60-3.md ข้อ 190/3
-reference/law/ministerial-regulations/mr-specific-2560.md ข้อ 4
-reference/circulars/circular-w214-2563.md หัวข้อ 1.1.2
+พระราชบัญญัติการจัดซื้อจัดจ้างและการบริหารพัสดุภาครัฐ พ.ศ. 2560 มาตรา 114
+ระเบียบกระทรวงการคลังว่าด้วยการจัดซื้อจัดจ้างและการบริหารพัสดุภาครัฐ พ.ศ. 2560 ข้อ 78
+ระเบียบกระทรวงการคลังว่าด้วยการจัดซื้อจัดจ้างและการบริหารพัสดุภาครัฐ (ฉบับที่ 3) พ.ศ. 2569 ข้อ 190/3
+กฎกระทรวงกำหนดวงเงินการจัดซื้อจัดจ้างพัสดุโดยวิธีเฉพาะเจาะจงฯ พ.ศ. 2560 ข้อ 4
+หนังสือเวียน ว 214 ลงวันที่ 18 พฤษภาคม 2563 หัวข้อ 1.1.2
 ```
+
+ชื่อไฟล์ใน `reference/` เป็น metadata ภายในสำหรับ retrieval และ validation เท่านั้น ไม่ควรแสดงเป็น citation ต่อผู้ใช้
 
 ## ข้อจำกัด
 
@@ -171,10 +173,28 @@ reference/circulars/circular-w214-2563.md หัวข้อ 1.1.2
 - Web-search fallback และการตรวจแหล่งข้อมูลภายนอกแบบอัตโนมัติยังไม่ได้ implement
 - คำตอบที่มีผลต่อกฎหมาย งบประมาณ สัญญา หรือความรับผิด ควรตรวจต้นฉบับทางการและหน่วยงานผู้มีอำนาจอีกครั้ง
 
+## โปรไฟล์โมเดลของ Codex
+
+ค่าเริ่มต้นของ project ตั้งเป็น `gpt-5.6-luna` และ reasoning `low` เพื่อให้งานดูแล repository เช่น sync, test, commit และ push ใช้ token อย่างประหยัด
+
+เมื่อทำงานตาม Pasadu Phase 1 ที่ต้องใช้ root orchestrator ให้เปิด profile `pasadu-legal` ซึ่งตั้งเป็น Terra medium:
+
+```powershell
+codex -p pasadu-legal
+```
+
+สำหรับงานดูแล repository โดยตรง ใช้ profile `pasadu-sync` หรือใช้ค่าเริ่มต้นของ project ได้เลย:
+
+```powershell
+codex -p pasadu-sync
+```
+
+Codex Desktop บางเวอร์ชันยังไม่แสดง custom profiles ใน model picker; ในกรณีนั้นให้เลือก Luna/Low ในแชท sync เอง หรือเริ่ม CLI ด้วย profile ข้างต้น
+
 ## Development Rules
 
 - ห้ามแต่งมาตรา ข้อ หนังสือเวียน หรือคำวินิจฉัย
-- ถ้าไม่พบ ให้ตอบว่าไม่พบใน reference ที่มี
+- ถ้าไม่พบ ให้ตอบว่าไม่พบในชุดกฎหมายและเอกสารอ้างอิงที่มี
 - ถ้าสรุป ต้องแยกจากถ้อยคำตัวบท
 - ทุก citation ต้องตรวจได้จาก index
 - เมื่อเพิ่ม reference ให้เพิ่ม metadata, source registry, routing tests และ regenerate `data/index/*.json`

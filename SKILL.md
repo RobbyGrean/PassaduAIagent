@@ -50,7 +50,7 @@ When available, use the repository scripts to avoid reading entire reference fil
 
 - `scripts/pasadu/build_index.py` builds `data/index/*.json` from every registered reference source.
 - `scripts/pasadu/route_query.py` decides the primary source and fallback source.
-- `scripts/pasadu/retrieve.py` returns the most relevant clauses with file and clause citations.
+- `scripts/pasadu/retrieve.py` returns the most relevant clauses with internal source metadata and clause citations; user-facing answers must translate the source into the legal authority's name.
 - `scripts/pasadu/answer_context.py` builds an LLM-ready context from `pasadu.md`, the user question, and retrieved references.
 - `scripts/pasadu/cite_check.py` checks whether final citations exist in the index.
 
@@ -129,8 +129,8 @@ For direct questions such as "มาตรา 56 คืออะไร", "ข้
 - Distinguish a non-appealable issue under section 115/the appeal ministerial regulation from a person or situation that does not qualify to exercise appeal rights under section 114 as described in Circular W367 item 2.
 - When references conflict, explain the conflict and prioritize the Regulation for operational steps, except contract administration issues where the Act must be checked first under this skill's routing policy.
 - Treat summaries inside `rbb60-3.md` as supporting explanation only. For legal answers, cite the regulation clauses or annex tables, not the summary section alone.
-- Use the citation form `reference/law/rbb60-3.md ข้อ ...`, including slash clauses such as `reference/law/rbb60-3.md ข้อ 190/3`.
-- Cite ministerial regulations by `ข้อ` and circulars by `หัวข้อ`, always including the repository path.
+- In user-facing answers, cite the legal authority by its human-readable name, followed by `มาตรา`, `ข้อ`, or `หัวข้อ` and the exact number. For example: `พระราชบัญญัติการจัดซื้อจัดจ้างและการบริหารพัสดุภาครัฐ พ.ศ. 2560 มาตรา 56`, `ระเบียบกระทรวงการคลังว่าด้วยการจัดซื้อจัดจ้างและการบริหารพัสดุภาครัฐ พ.ศ. 2560 ข้อ 78`, or `หนังสือเวียน ว 214 ลงวันที่ 18 พฤษภาคม 2563 หัวข้อ 1.1.2`.
+- Never expose internal repository filenames such as `prb60.md`, `rbb60.md`, or `rbb60-3.md` as the citation in the final answer. The paths remain internal metadata for retrieval and citation validation.
 
 ## Preferred Output
 
@@ -141,7 +141,7 @@ For most answers, use this shape:
 ...
 
 อ้างอิง:
-- reference/law/... ข้อ/มาตรา ...
+- ชื่อพระราชบัญญัติ/ระเบียบ/กฎกระทรวง/หนังสือเวียน ข้อ/มาตรา/หัวข้อ ...
 
 หมายเหตุ:
 ...
@@ -154,7 +154,7 @@ For diagnosis, use this shape:
 ...
 
 ตัวบทที่เกี่ยวข้อง:
-- reference/law/... ข้อ/มาตรา ...
+- ชื่อพระราชบัญญัติ/ระเบียบ/กฎกระทรวง/หนังสือเวียน ข้อ/มาตรา/หัวข้อ ...
 
 เหตุผล:
 ...
