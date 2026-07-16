@@ -1,200 +1,308 @@
-# PassaduAIagent
+<div align="center">
 
-ฐานความรู้และ retrieval workflow สำหรับ AI assistant ด้านการจัดซื้อจัดจ้างและการบริหารพัสดุภาครัฐของไทย
+# ⚖️ PasaduAIagent
 
-> เป้าหมายคือให้ AI ตอบจากเอกสารที่ตรวจสอบได้ อ้างมาตรา/ข้อ/หัวข้อจริง แยกลำดับฐานอำนาจ และบอกตรงไปตรงมาเมื่อข้อมูลใน repo ไม่พอ
+### ผู้ช่วย AI สำหรับงานจัดซื้อจัดจ้างและการบริหารพัสดุภาครัฐของไทย
 
-## ภาพรวม
+ระบบค้นคืนข้อมูลกฎหมายแบบอ้างอิงได้ พร้อม workflow สำหรับตอบคำถามอย่างมีหลักฐาน ตรวจสอบย้อนกลับได้ และรู้จักบอกเมื่อข้อมูลยังไม่เพียงพอ
 
-```text
-คำถามผู้ใช้
-   │
-   ▼
-route_query.py ── เลือกแหล่งอ้างอิงตามประเด็น
-   │
-   ▼
-retrieve.py ───── ค้น chunk ที่เกี่ยวข้อง
-   │
-   ▼
-answer_context.py ─ สร้าง context พร้อม guardrails
-   │
-   ▼
-คำตอบพร้อม citation ที่ตรวจด้วย cite_check.py
+<p>
+  <a href="./INSTALLATION.md">ติดตั้ง</a> ·
+  <a href="./SKILL.md">ดู Skill</a> ·
+  <a href="./pasadu.md">ดู Response Policy</a> ·
+  <a href="./docs/pasadu-agent-usage.md">คู่มือการใช้งาน</a>
+</p>
+
+![Phase 1](https://img.shields.io/badge/phase-1%20%7C%20evidence--first-8B5CF6?style=for-the-badge)
+![Thai Procurement](https://img.shields.io/badge/domain-Thai%20public%20procurement-0F766E?style=for-the-badge)
+![Read-only](https://img.shields.io/badge/workflow-read--only-334155?style=for-the-badge)
+
+</div>
+
+> **หลักคิดของ Pasadu**
+>
+> ตอบจากเอกสารที่ค้นและตรวจสอบได้ อ้างมาตรา/ข้อ/หัวข้อให้ตรงต้นฉบับ แยกลำดับศักดิ์ของแหล่งอ้างอิง และบอกตรง ๆ เมื่อ repository ยังมีข้อมูลไม่พอสำหรับสรุป
+
+---
+
+## สารบัญ
+
+- [ภาพรวมใน 30 วินาที](#ภาพรวมใน-30-วินาที)
+- [จุดเด่นของระบบ](#จุดเด่นของระบบ)
+- [Workflow การตอบคำถาม](#workflow-การตอบคำถาม)
+- [เริ่มใช้งานอย่างรวดเร็ว](#เริ่มใช้งานอย่างรวดเร็ว)
+- [ติดตั้ง](#ติดตั้ง)
+- [ใช้ retrieval layer โดยตรง](#ใช้-retrieval-layer-โดยตรง)
+- [โครงสร้าง repository](#โครงสร้าง-repository)
+- [ชุดข้อมูลอ้างอิง](#ชุดข้อมูลอ้างอิง)
+- [รูปแบบคำตอบและ citation](#รูปแบบคำตอบและ-citation)
+- [ข้อจำกัดที่ควรรู้](#ข้อจำกัดที่ควรรู้)
+- [ตรวจสอบและพัฒนาต่อ](#ตรวจสอบและพัฒนาต่อ)
+- [เอกสารที่เกี่ยวข้อง](#เอกสารที่เกี่ยวข้อง)
+
+## ภาพรวมใน 30 วินาที
+
+PasaduAIagent คือ **AI skill + local retrieval workflow** ที่ออกแบบมาเพื่อให้ผู้ช่วย AI ทำงานกับคำถามด้านพัสดุภาครัฐได้อย่างเป็นระบบ โดยเน้น 4 เรื่อง:
+
+| ส่วนประกอบ | ทำหน้าที่อะไร |
+| --- | --- |
+| **Reference library** | เก็บพระราชบัญญัติ ระเบียบ กฎกระทรวง และหนังสือเวียนที่อยู่ในขอบเขตของโปรเจกต์ |
+| **Routing layer** | เลือกแหล่งอ้างอิงหลักตามคำสำคัญ มาตรา ข้อ และประเด็นของคำถาม |
+| **Retrieval layer** | ค้นคืน section/chunk ที่เกี่ยวข้องจากดัชนีแบบ section-aware |
+| **Answer guardrails** | บังคับให้คำตอบแยกข้อเท็จจริงจากการตีความ พร้อมตรวจ citation ก่อนส่ง |
+
+### เส้นทางข้อมูล
+
+```mermaid
+flowchart LR
+    A[คำถามของผู้ใช้] --> B[Route query]
+    B --> C[ค้นคืนหลักฐาน]
+    C --> D[สร้าง answer context]
+    D --> E[วิเคราะห์ตามความซับซ้อน]
+    E --> F[ตรวจ citation]
+    F --> G[คำตอบที่ตรวจสอบย้อนกลับได้]
 ```
 
-### Multi-agent orchestration
+## จุดเด่นของระบบ
 
-Pasadu ใช้ root session เป็น orchestrator และเลือกเส้นทางที่ประหยัดที่สุดตามลักษณะงาน:
+<table>
+<tr>
+<td width="50%">
+
+### 🔎 Evidence-first
+
+เริ่มจากหลักฐานใน repository ก่อนเสมอ ไม่รีบคาดเดาคำตอบจากความจำของโมเดล
+
+</td>
+<td width="50%">
+
+### 🧭 Routing ตามประเด็น
+
+แยกคำถามเรื่องมาตรา ระเบียบ วิธีเฉพาะเจาะจง อุทธรณ์ และคุณสมบัติผู้ยื่นเสนอราคาไปยังแหล่งที่เหมาะสม
+
+</td>
+</tr>
+<tr>
+<td>
+
+### 🧠 Reasoning แบบพอดี
+
+ใช้การตอบตรงเมื่อเป็นการค้นคืน ใช้ analyst เมื่อมีการปรับบทกฎหมายเข้ากับข้อเท็จจริง และยกระดับเมื่อมีความขัดแย้งหรือความกำกวมที่มีนัยสำคัญ
+
+</td>
+<td>
+
+### ✅ Citation ตรวจได้
+
+ตรวจการอ้างอิงกับดัชนีภายในด้วย `cite_check.py` เพื่อช่วยลด citation ที่ไม่ตรงกับเอกสารต้นทาง
+
+</td>
+</tr>
+</table>
+
+## Workflow การตอบคำถาม
+
+Pasadu ใช้ root session เป็นตัวประสานงาน และเลือกเส้นทางที่เหมาะกับลักษณะคำถาม:
 
 ```text
 คำถาม
-  → legal-retriever: ค้นและคัดหลักฐานโดยไม่ตีความ
-  → คำถามตรง: root orchestrator เรียบเรียงคำตอบ
-  → ต้องวิเคราะห์: legal-analyst
-  → ขัดแย้ง/กำกวม/หลายตัวบท: legal-analyst-complex
-  → cite_check.py
-  → คำตอบสุดท้าย
+  │
+  ├─ ค้นคืน / อธิบายตรง ๆ       → route → retrieve → draft answer
+  │
+  ├─ ใช้กฎหมายกับข้อเท็จจริง     → route → retrieve → legal analyst → answer
+  │
+  └─ ขัดแย้ง / กำกวม / หลายบท    → route → retrieve → complex analysis → answer
+                                             │
+                                             └→ cite_check ก่อนส่งทุกครั้ง
 ```
 
-| Platform | Root orchestrator | Retriever | Analyst | Complex analyst |
-| --- | --- | --- | --- | --- |
-| Codex | GPT-5.6 Terra, medium | GPT-5.6 Luna, low | GPT-5.6 Luna, high | GPT-5.6 Luna, high |
-| Claude Code | โมเดลของผู้ใช้, medium | `inherit`, low | `inherit`, high | `inherit`, high |
-| Gemini CLI | โมเดลของผู้ใช้ | `inherit` | `inherit` + prompt ให้ reasoning อย่างรอบคอบ | `inherit` + prompt เชิงซับซ้อน |
+### ระดับการทำงาน
 
-ชื่อโมเดล Codex เป็น adapter ของรุ่นปัจจุบัน ส่วน Claude/Gemini ตั้งใจใช้ `inherit` เพื่อรองรับโมเดลที่ผู้ใช้มี หาก native subagents ใช้งานไม่ได้ ระบบยังทำ workflow เดิมใน main session ได้จาก `SKILL.md` และไฟล์คำสั่งประจำแพลตฟอร์ม
-
-ระบบยึดลำดับเอกสารดังนี้:
-
-1. พระราชบัญญัติ: หลักกฎหมายและอำนาจ
-2. ระเบียบ: วิธีปฏิบัติและรายละเอียด
-3. กฎกระทรวง: กฎเฉพาะที่ออกตามฐานอำนาจ
-4. หนังสือเวียน: แนวทางปฏิบัติประกอบ ไม่ใช้แทนตัวบทระดับสูงกว่า
-
-## Reference Catalog
-
-| ประเภท | ไฟล์ | ประเด็นหลัก |
+| สถานการณ์ | เส้นทางที่ใช้ | ผลลัพธ์ที่คาดหวัง |
 | --- | --- | --- |
-| พระราชบัญญัติ | `reference/law/prb60.md` | พ.ร.บ. การจัดซื้อจัดจ้างฯ พ.ศ. 2560 |
-| ระเบียบ | `reference/law/rbb60.md` | ระเบียบกระทรวงการคลังฯ พ.ศ. 2560 |
-| ระเบียบ | `reference/law/rbb60-3.md` | ระเบียบฉบับที่ 3 พ.ศ. 2569; ข้อ 190-191 |
-| กฎกระทรวง | `reference/law/ministerial-regulations/mr-specific-2560.md` | วิธีเฉพาะเจาะจง วงเงินเล็กน้อย ข้อตกลงเป็นหนังสือ และผู้ตรวจรับคนเดียว |
-| กฎกระทรวง | `reference/law/ministerial-regulations/mr-appeal-exclusions-2568.md` | กฎกระทรวงอุทธรณ์; เรื่องที่อุทธรณ์ไม่ได้ |
-| หนังสือเวียน | `reference/circulars/circular-w367-2567.md` | ว 367; กรณีไม่เข้าข่ายใช้สิทธิอุทธรณ์ตามมาตรา 114 |
-| หนังสือเวียน | `reference/circulars/circular-w214-2563.md` | ว 214; คุณสมบัติผู้ยื่นเสนอราคา ผลงาน และคุณลักษณะเฉพาะ |
+| ต้องการมาตรา ข้อ หรือขั้นตอนที่ระบุชัด | Direct retrieval | สรุปจาก evidence packet พร้อม citation |
+| ต้องวิเคราะห์ว่ากฎหมายใช้กับกรณีนี้อย่างไร | Legal analyst | แยกหลักกฎหมาย ข้อเท็จจริง เงื่อนไข และข้อสรุป |
+| มีหลายบทต้องอ่านประกอบกัน หรือมีความกำกวมสำคัญ | Complex analyst | อธิบายจุดขัดแย้ง สมมติฐาน และความไม่แน่นอนอย่างชัดเจน |
+| ค้นแล้วไม่มีหลักฐานเพียงพอ | Safe failure | แจ้งข้อมูลที่ขาด โดยไม่แต่งคำตอบขึ้นเอง |
 
-## Routing Matrix
+> **หมายเหตุ:** Phase 1 ใช้ข้อมูลจาก repository เป็นหลัก และเป็น workflow แบบอ่านอย่างเดียว (read-only)
 
-| คำถามหรือคำสำคัญ | Primary source | แหล่งประกอบ |
-| --- | --- | --- |
-| `มาตรา`, `พรบ.`, `พระราชบัญญัติ` | `prb60.md` | `rbb60.md` |
-| `ข้อ`, `ระเบียบ`, วิธีปฏิบัติทั่วไป | `rbb60.md` | `prb60.md` |
-| ข้อ 190-191, คะแนนความเสียหาย, การระงับ | `rbb60-3.md` | `rbb60.md`, `prb60.md` |
-| `ว 214`, คุณสมบัติผู้ยื่นเสนอราคา | `circular-w214-2563.md` | `rbb60.md`, `prb60.md` |
-| `เจาะจง`, `เฉพาะเจาะจง` | `prb60.md` มาตรา 56 | กฎกระทรวงเจาะจง → `rbb60.md` |
-| วงเงินเล็กน้อย | `prb60.md` มาตรา 56 | กฎกระทรวงเจาะจง → `rbb60.md` |
-| ไม่ทำข้อตกลงเป็นหนังสือ, ผู้ตรวจรับคนเดียว | `prb60.md` มาตรา 56 | กฎกระทรวงเจาะจง → `rbb60.md` |
-| การอุทธรณ์ทั่วไป | `prb60.md` มาตรา 114-119 | กฎกระทรวงอุทธรณ์, ว 367 |
-| เรื่องที่อุทธรณ์ไม่ได้ | กฎกระทรวงอุทธรณ์ | `prb60.md` มาตรา 115 |
-| ไม่เข้าข่ายใช้สิทธิอุทธรณ์ | ว 367 | `prb60.md` มาตรา 114 |
+## เริ่มใช้งานอย่างรวดเร็ว
 
-### หลักแยกเรื่องอุทธรณ์
+### 1. ติดตั้งบน Codex สำหรับ Windows
 
-- **เรื่องที่อุทธรณ์ไม่ได้:** ผู้ยื่นข้อเสนอมีสิทธิอุทธรณ์ตามมาตรา 114 แต่กฎหมายห้ามยกเรื่องบางประเภทขึ้นอุทธรณ์ ตามมาตรา 115 และกฎกระทรวงอุทธรณ์
-- **ไม่เข้าข่ายใช้สิทธิอุทธรณ์:** บุคคลหรือสถานการณ์นั้นไม่เข้าองค์ประกอบการใช้สิทธิตามมาตรา 114 ตั้งแต่ต้น ตามแนวทาง ว 367 ข้อ 2
+เปิด PowerShell แล้วรัน:
 
-## โครงสร้าง Repo
+```powershell
+New-Item -ItemType Directory -Force "$env:USERPROFILE\.codex\skills" | Out-Null
+git clone https://github.com/RobbyGrean/PassaduAIagent.git "$env:USERPROFILE\.codex\skills\pasadu"
+```
+
+จากนั้นปิด–เปิด Codex หรือเริ่ม task ใหม่ แล้วถามได้ทันที เช่น:
+
+```text
+คณะกรรมการตรวจรับพัสดุมีหน้าที่อะไร
+```
+
+### 2. เรียกใช้งานแบบ manual
+
+```text
+/pasadu มาตรา 56 ใช้กรณีใด
+/passadu มาตรา 56 ใช้กรณีใด
+$pasadu มาตรา 56 ใช้กรณีใด
+```
+
+โดยทั่วไปไม่จำเป็นต้องพิมพ์ชื่อ skill — Codex ควร auto-trigger จาก intent ของคำถามเมื่อคำถามอยู่ในขอบเขตที่เกี่ยวข้อง
+
+## ติดตั้ง
+
+คู่มือติดตั้งฉบับเต็มครอบคลุม Codex Windows App, Codex CLI, ChatGPT Work, Gemini CLI และ Claude Code:
+
+➡️ **[อ่าน INSTALLATION.md](./INSTALLATION.md)**
+
+### ข้อกำหนดขั้นต่ำ
+
+- Git สำหรับ clone และอัปเดต repository
+- Codex, Claude Code หรือ Gemini CLI ตามแพลตฟอร์มที่ต้องการใช้
+- Python 3.10 ขึ้นไป หากต้องการรัน retrieval scripts, tests หรือ evaluation
+
+> การถามตอบผ่าน skill ยังทำงานได้โดยไม่ติดตั้ง Python แต่เครื่องมือค้นคืนและชุดทดสอบจะไม่สามารถทำงานได้
+
+## ใช้ retrieval layer โดยตรง
+
+สคริปต์ทั้งหมดอยู่ใน [`scripts/pasadu/`](./scripts/pasadu/) และใช้ index ที่อยู่ใน [`data/index/`](./data/index/)
+
+### Route คำถามไปยังแหล่งอ้างอิง
+
+```powershell
+python -B scripts/pasadu/route_query.py "มาตรา 56 ใช้กรณีใด"
+```
+
+เพิ่ม `--json` หากต้องการผลลัพธ์สำหรับนำไปใช้งานต่อในระบบอื่น
+
+### ค้นคืนหลักฐานที่เกี่ยวข้อง
+
+```powershell
+python -B scripts/pasadu/retrieve.py "หน้าที่ของคณะกรรมการตรวจรับพัสดุ" --limit 5
+```
+
+### สร้าง context สำหรับผู้ช่วย AI
+
+```powershell
+python -B scripts/pasadu/answer_context.py "การอุทธรณ์ผลการจัดซื้อจัดจ้างทำได้อย่างไร" --limit 5
+```
+
+### ตรวจ citation ของคำตอบ
+
+```powershell
+python -B scripts/pasadu/cite_check.py --text "คำตอบที่มี citation อยู่ในข้อความ"
+```
+
+หรืออ่านคำตอบจากไฟล์ UTF-8:
+
+```powershell
+python -B scripts/pasadu/cite_check.py --file answer.txt
+```
+
+## โครงสร้าง repository
 
 ```text
 PassaduAIagent/
-├─ SKILL.md
-├─ pasadu.md
-├─ AGENTS.md
-├─ CLAUDE.md
-├─ GEMINI.md
-├─ .codex/
-│  ├─ config.toml
-│  └─ agents/
-├─ .claude/agents/
-├─ .gemini/agents/
-├─ reference/
-│  ├─ law/
-│  │  ├─ prb60.md
-│  │  ├─ rbb60.md
-│  │  ├─ rbb60-3.md
-│  │  └─ ministerial-regulations/
-│  │     ├─ mr-specific-2560.md
-│  │     └─ mr-appeal-exclusions-2568.md
-│  ├─ circulars/
-│  │  ├─ circular-w214-2563.md
-│  │  └─ circular-w367-2567.md
-│  └─ ECPP/
-├─ scripts/pasadu/
-│  ├─ build_index.py
-│  ├─ route_query.py
-│  ├─ retrieve.py
-│  ├─ answer_context.py
-│  ├─ cite_check.py
-│  └─ eval_queries.py
-├─ data/index/
-├─ evals/
-└─ tests/
+├── SKILL.md                    # trigger และ workflow หลักของ skill
+├── pasadu.md                   # persona, policy และรูปแบบคำตอบ
+├── AGENTS.md                   # กติกาการประสานงานของ Phase 1
+├── INSTALLATION.md             # คู่มือติดตั้งทุกแพลตฟอร์ม
+├── reference/                  # คลังเอกสารอ้างอิง
+│   ├── law/                    # พ.ร.บ., ระเบียบ และกฎกระทรวง
+│   ├── circulars/              # หนังสือเวียน
+│   └── ECPP/                   # เอกสารประกอบ e-Catalog / e-CPP
+├── data/index/                 # ดัชนีสำหรับ routing และ retrieval
+├── scripts/pasadu/             # เครื่องมือค้นคืนและตรวจ citation
+├── evals/                      # คำถามและ citation ที่คาดหวัง
+├── tests/                      # ชุดทดสอบสคริปต์
+├── docs/                       # คู่มือ การออกแบบ และ roadmap
+└── how2agent/                  # คู่มือเริ่มต้นใช้งานแบบ visual
 ```
 
-## Quick Start
+## ชุดข้อมูลอ้างอิง
 
-ต้องใช้ Python 3.10 ขึ้นไป และไม่มี third-party dependency สำหรับ retrieval scripts
+คลังข้อมูลปัจจุบันเน้นกฎหมายและเอกสารที่จำเป็นต่อการตอบคำถาม procurement ระยะเริ่มต้น:
+
+| กลุ่ม | เอกสารหลัก | ประเด็นที่ครอบคลุม |
+| --- | --- | --- |
+| พระราชบัญญัติ | พ.ร.บ. การจัดซื้อจัดจ้างฯ พ.ศ. 2560 | หลักการ อำนาจ วิธีจัดซื้อจัดจ้าง และการอุทธรณ์ |
+| ระเบียบ | ระเบียบกระทรวงการคลังฯ พ.ศ. 2560 | ขั้นตอนปฏิบัติ รายละเอียด และข้อกำหนดทั่วไป |
+| ระเบียบฉบับแก้ไข | ระเบียบฯ ฉบับที่ 3 พ.ศ. 2569 | ข้อ 190–191 และประเด็นที่มีการปรับปรุง |
+| กฎกระทรวง | กฎกระทรวงกำหนดวิธีเฉพาะเจาะจงฯ | วิธีเฉพาะเจาะจง วงเงินเล็กน้อย และผู้ตรวจรับ |
+| หนังสือเวียน | ว 214 และ ว 367 | คุณสมบัติผู้ยื่นเสนอราคา และหลักเกณฑ์ด้านการอุทธรณ์ |
+
+การเพิ่ม reference ใหม่ควรอัปเดต metadata, source registry, routing tests และสร้าง index ใหม่ให้ครบชุด
+
+## รูปแบบคำตอบและ citation
+
+คำตอบที่ดีของ Pasadu ควรมีลำดับดังนี้:
+
+1. **คำตอบสั้นก่อน** — บอกผลลัพธ์ที่ผู้ถามต้องการรู้
+2. **ฐานกฎหมาย** — ระบุมาตรา ข้อ หรือหัวข้อที่เกี่ยวข้อง
+3. **เงื่อนไขและข้อยกเว้น** — ระบุให้ชัดว่าหลักเกณฑ์ใช้เมื่อใดและไม่ใช้เมื่อใด
+4. **การประยุกต์กับกรณี** — แยกข้อเท็จจริงออกจากการตีความ
+5. **ข้อควรตรวจต่อ** — ชี้ข้อมูลที่ยังขาดหรือควรตรวจเอกสารทางการเพิ่มเติม
+
+Citation ต้องสอดคล้องกับ section ที่มีอยู่จริงใน index และไม่ควรอ้างเกินกว่าหลักฐานที่ค้นได้ หากค้นไม่พบ ให้ตอบว่าไม่พบในชุดเอกสารปัจจุบันแทนการคาดเดา
+
+## ข้อจำกัดที่ควรรู้
+
+- ขอบเขตความรู้ขึ้นอยู่กับเอกสารที่อยู่ใน `reference/` และ index ที่สร้างไว้ใน repository
+- ยังไม่มี web-search fallback หรือการตรวจสอบเอกสารภายนอกแบบอัตโนมัติ
+- ยังไม่มี chatbot runtime แบบเต็มรูปแบบ — repository นี้เป็น skill และ retrieval foundation
+- คำตอบที่กระทบสิทธิ หน้าที่ งบประมาณ สัญญา หรือความรับผิด ควรตรวจต้นฉบับทางการและหน่วยงานผู้มีอำนาจอีกครั้ง
+- การเปลี่ยนแปลงเอกสารอ้างอิงต้องทำอย่างระมัดระวัง เพราะมีผลต่อ routing, citation และผล evaluation
+
+## ตรวจสอบและพัฒนาต่อ
+
+### รัน tests
 
 ```powershell
-python scripts\pasadu\build_index.py
-python scripts\pasadu\route_query.py "วงเงินเล็กน้อยไม่ทำข้อตกลงเป็นหนังสือได้ไหม" --json
-python scripts\pasadu\retrieve.py "ว 214 กำหนดคุณสมบัติผู้ยื่นเสนอราคาอย่างไร" --limit 5
-python scripts\pasadu\answer_context.py "เรื่องใดอุทธรณ์ไม่ได้"
-python scripts\pasadu\cite_check.py --text "อ้างอิง: หนังสือเวียน ว 214 ลงวันที่ 18 พฤษภาคม 2563 หัวข้อ 1.1.2"
+python -B -m unittest discover -s tests
 ```
 
-รัน verification suite:
+### รัน evaluation queries
 
 ```powershell
-python -m unittest discover -s tests
-python scripts\pasadu\eval_queries.py
+python -B scripts/pasadu/eval_queries.py
 ```
 
-## ส่วนประกอบหลัก
+### สร้าง index ใหม่
 
-| ส่วน | หน้าที่ |
+```powershell
+python -B scripts/pasadu/build_index.py
+```
+
+ก่อนส่งการเปลี่ยนแปลงควรตรวจอย่างน้อย:
+
+- retrieval ค้น section สำคัญได้จริง
+- routing ชี้ source หลักและ source ประกอบถูกต้อง
+- citation ผ่าน `cite_check.py`
+- tests และ evaluation ไม่ถดถอย
+- ไม่เผลอแก้สาระของกฎหมายจากการจัดรูปแบบเอกสาร
+
+## เอกสารที่เกี่ยวข้อง
+
+| เอกสาร | ใช้เมื่อ |
 | --- | --- |
-| `SKILL.md` | trigger และ routing guidance สำหรับ agent |
-| `pasadu.md` | persona, policy, citation rules และข้อห้าม |
-| `build_index.py` | อ่าน metadata และแตกเอกสารเป็น chunks |
-| `route_query.py` | เลือก primary/fallback sources |
-| `retrieve.py` | จัดอันดับมาตรา ข้อ และหัวข้อที่เกี่ยวข้อง |
-| `answer_context.py` | สร้าง context พร้อมข้อกำกับการตอบ |
-| `cite_check.py` | ตรวจ citation กับ index จริง |
-| `eval_queries.py` | smoke eval สำหรับ routing และ retrieval |
+| [`INSTALLATION.md`](./INSTALLATION.md) | ต้องการติดตั้งหรือแก้ปัญหาแต่ละแพลตฟอร์ม |
+| [`SKILL.md`](./SKILL.md) | ต้องการเข้าใจกติกา trigger และ workflow ของ skill |
+| [`pasadu.md`](./pasadu.md) | ต้องการดู persona, response policy และ guardrails |
+| [`docs/pasadu-agent-usage.md`](./docs/pasadu-agent-usage.md) | ต้องการดูสถานะปัจจุบันและ roadmap |
+| [`docs/token-usage.md`](./docs/token-usage.md) | ต้องการเข้าใจการใช้ context และ token |
+| [`how2agent/index.html`](./how2agent/index.html) | ต้องการคู่มือเริ่มต้นใช้งานแบบภาพ |
 
-## Citation Format
+---
 
-```text
-พระราชบัญญัติการจัดซื้อจัดจ้างและการบริหารพัสดุภาครัฐ พ.ศ. 2560 มาตรา 114
-ระเบียบกระทรวงการคลังว่าด้วยการจัดซื้อจัดจ้างและการบริหารพัสดุภาครัฐ พ.ศ. 2560 ข้อ 78
-ระเบียบกระทรวงการคลังว่าด้วยการจัดซื้อจัดจ้างและการบริหารพัสดุภาครัฐ (ฉบับที่ 3) พ.ศ. 2569 ข้อ 190/3
-กฎกระทรวงกำหนดวงเงินการจัดซื้อจัดจ้างพัสดุโดยวิธีเฉพาะเจาะจงฯ พ.ศ. 2560 ข้อ 4
-หนังสือเวียน ว 214 ลงวันที่ 18 พฤษภาคม 2563 หัวข้อ 1.1.2
-```
+<div align="center">
 
-ชื่อไฟล์ใน `reference/` เป็น metadata ภายในสำหรับ retrieval และ validation เท่านั้น ไม่ควรแสดงเป็น citation ต่อผู้ใช้
+**Pasadu — เปลี่ยนคำถามด้านพัสดุให้กลายเป็นคำตอบที่มีหลักฐาน**
 
-## ข้อจำกัด
+<sub>Phase 1 · Evidence-first · Read-only · Built for Thai public procurement workflows</sub>
 
-- ระบบนี้เป็นฐานข้อมูลอ้างอิงและ retrieval workflow ไม่ใช่คำวินิจฉัยทางกฎหมายอย่างเป็นทางการ
-- Index ครอบคลุมเฉพาะเอกสารที่ลงทะเบียนใน `scripts/pasadu/common.py`
-- หนังสือเวียนเป็นแนวทางประกอบ ต้องอ่านร่วมกับฐานอำนาจจาก พ.ร.บ. ระเบียบ หรือกฎกระทรวง
-- Web-search fallback และการตรวจแหล่งข้อมูลภายนอกแบบอัตโนมัติยังไม่ได้ implement
-- คำตอบที่มีผลต่อกฎหมาย งบประมาณ สัญญา หรือความรับผิด ควรตรวจต้นฉบับทางการและหน่วยงานผู้มีอำนาจอีกครั้ง
-
-## โปรไฟล์โมเดลของ Codex
-
-ค่าเริ่มต้นของ project ตั้งเป็น `gpt-5.6-luna` และ reasoning `low` เพื่อให้งานดูแล repository เช่น sync, test, commit และ push ใช้ token อย่างประหยัด
-
-เมื่อทำงานตาม Pasadu Phase 1 ที่ต้องใช้ root orchestrator ให้เปิด profile `pasadu-legal` ซึ่งตั้งเป็น Terra medium:
-
-```powershell
-codex -p pasadu-legal
-```
-
-สำหรับงานดูแล repository โดยตรง ใช้ profile `pasadu-sync` หรือใช้ค่าเริ่มต้นของ project ได้เลย:
-
-```powershell
-codex -p pasadu-sync
-```
-
-Codex Desktop บางเวอร์ชันยังไม่แสดง custom profiles ใน model picker; ในกรณีนั้นให้เลือก Luna/Low ในแชท sync เอง หรือเริ่ม CLI ด้วย profile ข้างต้น
-
-## Development Rules
-
-- ห้ามแต่งมาตรา ข้อ หนังสือเวียน หรือคำวินิจฉัย
-- ถ้าไม่พบ ให้ตอบว่าไม่พบในชุดกฎหมายและเอกสารอ้างอิงที่มี
-- ถ้าสรุป ต้องแยกจากถ้อยคำตัวบท
-- ทุก citation ต้องตรวจได้จาก index
-- เมื่อเพิ่ม reference ให้เพิ่ม metadata, source registry, routing tests และ regenerate `data/index/*.json`
+</div>
