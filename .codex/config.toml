@@ -1,13 +1,7 @@
-# Leave the project default unpinned so new chats use the global model and
-# reasoning settings selected by the user or Codex.
-# Use the `pasadu-legal` profile explicitly for the Phase 1 legal orchestrator.
+# Keep the root/input session unpinned so it inherits the model and reasoning
+# settings selected by the user or Codex. Legal subagents pin their own models.
 
 [agents]
 max_threads = 4
 max_depth = 1
 interrupt_message = true
-
-[profiles.pasadu-legal]
-model = "gpt-5.6-terra"
-model_reasoning_effort = "medium"
-

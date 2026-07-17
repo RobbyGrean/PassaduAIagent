@@ -125,6 +125,19 @@ Pasadu ใช้ root session เป็นตัวประสานงาน �
 | มีหลายบทต้องอ่านประกอบกัน หรือมีความกำกวมสำคัญ | Complex analyst | อธิบายจุดขัดแย้ง สมมติฐาน และความไม่แน่นอนอย่างชัดเจน |
 | ค้นแล้วไม่มีหลักฐานเพียงพอ | Safe failure | แจ้งข้อมูลที่ขาด โดยไม่แต่งคำตอบขึ้นเอง |
 
+### การตั้งค่าโมเดล
+
+สำหรับ Codex ค่าโมเดลของแต่ละช่วงทำงานเป็นดังนี้:
+
+| ช่วงทำงาน | โมเดล | เหตุผลการตั้งค่า |
+| --- | --- | --- |
+| รับคำถาม / root session | `inherit` | ใช้โมเดลและ reasoning ที่ผู้ใช้หรือ Codex เลือกไว้ |
+| `legal_retriever` | `gpt-5.6-luna` / high | ค้นและคัดหลักฐานจาก repository |
+| `legal_analyst` | `gpt-5.6-luna` / high | วิเคราะห์การใช้กฎหมายกับข้อเท็จจริง |
+| `legal_analyst_complex` | `gpt-5.6-luna` / high | วิเคราะห์ความขัดแย้ง ความกำกวม และหลายบทบัญญัติ |
+
+ค่าดังกล่าวกำหนดใน [`.codex/config.toml`](./.codex/config.toml) และ [`.codex/agents/`](./.codex/agents/)
+
 > **หมายเหตุ:** Phase 1 ใช้ข้อมูลจาก repository เป็นหลัก และเป็น workflow แบบอ่านอย่างเดียว (read-only)
 
 ## เริ่มใช้งานอย่างรวดเร็ว
@@ -132,7 +145,6 @@ Pasadu ใช้ root session เป็นตัวประสานงาน �
 ### 1. ติดตั้งบน Codex สำหรับ Windows
 
 เปิด PowerShell แล้วรัน:
-
 ```powershell
 New-Item -ItemType Directory -Force "$env:USERPROFILE\.codex\skills" | Out-Null
 git clone https://github.com/RobbyGrean/PassaduAIagent.git "$env:USERPROFILE\.codex\skills\pasadu"
