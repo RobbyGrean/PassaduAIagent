@@ -20,7 +20,9 @@ Use the Pasadu workflow without loading full reference files:
 - Treat Act and Regulation text as legal authority; label ministerial regulations and circular guidance separately.
 - Apply the authority hierarchy: the Act supplies the legal power and scope, the Regulation supplies operating steps, ministerial regulations supply subordinate rules, and circulars are supporting guidance. If sources differ, explain the relationship and do not let a lower-level source silently override a higher-level one.
 - Do not use a circular as a substitute for its supporting Act, Regulation, or ministerial regulation.
-- For web questions, use only official sources and label them as outside the project reference set.
+- Web search is an explicit root-orchestrator fallback only after primary and configured fallback repository sources were searched and evidence is partial or not found. Do not use web search to fill missing facts.
+- If web fallback is used, start with exactly: คำตอบนี้ใช้ข้อมูลจาก web search ไม่ได้ใช้ฐานข้อมูลของ repository ข้อมูลมีโอกาสคลาดเคลื่อน โปรดตรวจสอบกับแหล่งทางการอีกครั้ง
+- Separate `Repository source` and `Web source`. For each web source show its owner, direct URL, access date when available, verified authority title, exact provision/document number, and the label `web source`; never invent unverified metadata. Show conflicts and advise official verification for consequential issues.
 """
 
 
@@ -64,7 +66,7 @@ def build_context(query: str, limit: int = 5, full_rules: bool = False) -> str:
         [
             "",
             "## Output Guardrail",
-            "ตอบโดยใช้เฉพาะ Retrieved References ข้างต้น ถ้าไม่พบตัวบทที่ตอบคำถาม ให้ตอบว่าไม่พบในชุดกฎหมายและเอกสารอ้างอิงของโครงการ",
+            "ใช้ Retrieved References ข้างต้นเป็นฐานของส่วน Repository source เท่านั้น หากไม่พบตัวบทที่ตอบคำถาม ให้ root orchestrator พิจารณา web fallback ตามกติกา โดยต้องใส่ disclaimer และแสดง Web source แยกต่างหาก",
         ]
     )
     return "\n".join(lines)

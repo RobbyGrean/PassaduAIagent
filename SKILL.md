@@ -110,11 +110,12 @@ Use both files when the question needs both the Act's authority and the Regulati
    - ตอบตามตัวบทเท่านั้น
    - ตอบเชิงปฏิบัติโดยอ้างคู่มือ/แนววินิจฉัยประกอบ
 4. Search the primary reference source using the routing policy.
-5. If no relevant clause is found, search the fallback source.
+5. Search every configured fallback source before deciding that the repository lacks evidence.
 6. Identify the exact section or clause.
-7. Answer from the cited text.
-8. Ask concise clarification questions if facts are missing.
-9. State uncertainty when the reference does not fully answer the question.
+7. Answer from the repository evidence when it fully answers the question.
+8. If the repository result is `partial` or `not_found` after primary and fallback retrieval, and no missing-fact question must be answered first, the root orchestrator may enter the web search fallback described below.
+9. Ask concise clarification questions if facts are missing; do not use web search to fill missing facts.
+10. State uncertainty when the reference does not fully answer the question.
 
 For direct questions such as "มาตรา 56 คืออะไร", "ข้อ 78 ว่าอย่างไร", or "ข้อ 190/3 ประเมินอะไร", do not ask the mode question first; retrieve and answer directly.
 
@@ -122,7 +123,13 @@ For direct questions such as "มาตรา 56 คืออะไร", "ข้
 
 - Do not invent law.
 - Do not cite a section or clause that was not found.
-- Do not silently rely on outside legal sources.
+- Do not silently rely on outside legal sources. Web search is allowed only as the explicit fallback after repository routing, primary retrieval, and configured fallback retrieval are complete.
+- `legal_retriever`, `legal_analyst`, and `legal_analyst_complex` must never browse the web. Only the inherited root orchestrator may run the fallback search.
+- If the repository supports only part of an answer, separate `Repository source` and `Web source` sections and keep citations visibly distinct.
+- Every answer using web search must begin with exactly: `คำตอบนี้ใช้ข้อมูลจาก web search ไม่ได้ใช้ฐานข้อมูลของ repository ข้อมูลมีโอกาสคลาดเคลื่อน โปรดตรวจสอบกับแหล่งทางการอีกครั้ง`
+- For each web source, show the owning website or agency, direct URL, access date when available, the verified title of the Act, Regulation, ministerial regulation, circular, or announcement, and the verified section, clause, heading, or document number. Label it `web source`.
+- Prefer government gazettes and official agency websites. Do not invent or infer an unverified title, clause, document number, or URL; if it cannot be verified, say that it cannot be confirmed.
+- If web sources conflict, present both sources and the conflict. For issues affecting rights, duties, budgets, contracts, or liability, tell the user to verify the official original and the competent authority.
 - Do not change quoted statutory or regulatory text.
 - If the answer is not found in the available references, say so plainly.
 - Do not treat manuals, circulars, rulings, FAQ, examples, or checklists as higher authority than the Act or Regulation. When those references are added later, label them as supporting practical guidance unless the user asks otherwise.
@@ -145,6 +152,24 @@ For most answers, use this shape:
 
 หมายเหตุ:
 ...
+```
+
+When web fallback is used, put the mandatory disclaimer first and then use this additional shape:
+
+```text
+คำตอบนี้ใช้ข้อมูลจาก web search ไม่ได้ใช้ฐานข้อมูลของ repository ข้อมูลมีโอกาสคลาดเคลื่อน โปรดตรวจสอบกับแหล่งทางการอีกครั้ง
+
+Repository source:
+- ...
+
+Web source:
+- [ชื่อเว็บไซต์หรือหน่วยงาน] — [ชื่อกฎหมาย/ระเบียบ/หนังสือเวียน/ประกาศ], [มาตรา/ข้อ/หัวข้อ/เลขที่เอกสารที่ยืนยันได้]
+  URL: https://...
+  วันที่เข้าถึง: ... (ถ้าระบบรองรับ)
+  แหล่งนี้เป็น web source ไม่ใช่ repository source
+
+คำตอบและข้อจำกัด:
+- ...
 ```
 
 For diagnosis, use this shape:

@@ -9,4 +9,4 @@ tools:
 max_turns: 20
 ---
 
-Read `SKILL.md` and `pasadu.md`. Analyze only the supplied evidence packet with high reasoning care. Explain authority hierarchy, scope, conflicts, assumptions, unresolved tensions, and the citation supporting every material conclusion. Never edit files, browse the web, rely on remembered law, or invent citations.
+Read `SKILL.md` and `pasadu.md`. Analyze only the supplied evidence packet with high reasoning care. Explain authority hierarchy, scope, conflicts, assumptions, unresolved tensions, and the citation supporting every material conclusion. Never edit files, browse the web, rely on remembered law, or invent citations. Return `insufficient_evidence` when the repository packet is inadequate; web fallback belongs only to the root conversation.

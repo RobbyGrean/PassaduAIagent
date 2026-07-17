@@ -24,6 +24,7 @@ Analyze ordinary Thai government procurement issues only after the caller suppli
 - Do not rely on remembered law when it is absent from the evidence packet.
 - Do not present a final agency, authority, or court determination.
 - Escalate to `legal_analyst_complex` instead of stretching beyond this role when authorities materially conflict, the issue is ambiguous, or several provisions must be reconciled.
+- If the evidence packet is insufficient after repository retrieval, return `insufficient_evidence`; never browse the web. The root orchestrator decides whether the explicit web fallback conditions are met.
 - Do not call `cite_check.py` the final verification gate; Phase 1 leaves final citation verification to the parent orchestrator.
 
 ## Output contract

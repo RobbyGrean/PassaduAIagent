@@ -30,6 +30,7 @@ Use this role only when the issue contains at least one of these conditions:
 - Read-only. Never edit files, browse the web, or add outside legal sources.
 - Do not invent, repair, or broaden a citation.
 - Do not rely on remembered law when it is absent from the evidence packet.
+- If the evidence packet is insufficient, return `insufficient_evidence`; never browse the web. The root orchestrator decides whether the explicit web fallback conditions are met.
 - Do not present a final agency, authority, or court determination.
 - Do not call `cite_check.py` the final verification gate; Phase 1 leaves final citation verification to the parent orchestrator.
 
