@@ -1,0 +1,34 @@
+คุณกำลังทำหน้าที่เป็นผู้ติดตั้ง Pasadu skill บนเครื่อง Windows ของฉัน
+
+เป้าหมายคือทำให้เครื่องนี้มี Pasadu skill ที่ใช้งานได้จริงใน user-level Codex skills directory ไม่ใช่เพียงแค่อธิบายวิธีติดตั้งหรือแสดงคำสั่งให้ฉันทำเอง
+
+ให้ดำเนินการตามกติกานี้อย่างเคร่งครัด:
+
+1. ตรวจหา repository ของ Pasadu ใน workspace ปัจจุบัน โดยดูว่ามี INSTALLATION.md และ SKILL.md อยู่ด้วยกันหรือไม่
+2. ถ้าไม่พบ repository ใน workspace ให้ใช้ repository URL นี้เพื่อดึง source ที่จำเป็นก่อน:
+   https://github.com/RobbyGrean/PassaduAIagent.git
+3. อ่าน INSTALLATION.md ฉบับเต็มจาก repository ของ Pasadu ก่อนดำเนินการติดตั้งลง user-level skills directory
+4. ใช้ขั้นตอนใน INSTALLATION.md เป็นแหล่งอ้างอิงหลัก หากข้อความนี้กับ INSTALLATION.md ขัดกัน ให้ยึด INSTALLATION.md และแจ้งฉันว่าพบความขัดแย้ง
+5. ตรวจว่าระบบเป็น Windows และตรวจว่ามี Git พร้อมใช้งาน
+6. ติดตั้ง repository ทั้งชุดจาก:
+   https://github.com/RobbyGrean/PassaduAIagent.git
+7. ติดตั้งไว้ที่:
+   %USERPROFILE%\.codex\skills\pasadu
+8. ถ้ามี Pasadu repository ที่ถูกต้องอยู่แล้วที่ตำแหน่งนี้ ให้ update ด้วย git pull --ff-only แทนการ clone ซ้ำ
+9. ถ้าตำแหน่งปลายทางมีไฟล์อยู่แต่ไม่ใช่ Pasadu repository ที่ถูกต้อง ห้ามลบ ห้ามเขียนทับ และให้หยุดเพื่อรายงานปัญหา
+10. ต้องติดตั้งทั้ง repository ห้ามคัดลอกเฉพาะ SKILL.md
+11. ตรวจให้แน่ใจว่าไฟล์และโฟลเดอร์ต่อไปนี้มีอยู่จริง:
+   - %USERPROFILE%\.codex\skills\pasadu\SKILL.md
+   - %USERPROFILE%\.codex\skills\pasadu\pasadu.md
+   - %USERPROFILE%\.codex\skills\pasadu\reference\law\
+   - %USERPROFILE%\.codex\skills\pasadu\scripts\pasadu\
+12. ห้ามแก้ไข reference, data/index, evals, tests หรือเอกสารกฎหมายเพื่อให้การติดตั้งผ่าน
+13. หากคำสั่งใดทำไม่สำเร็จ ให้รายงานคำสั่งนั้นและสาเหตุจริง ห้ามอ้างว่าติดตั้งสำเร็จจากการคาดเดา
+14. หาก Codex ต้องขอสิทธิ์เพื่อเขียนลง user-level skills directory ให้ขอสิทธิ์ตามระบบ แล้วดำเนินการต่อเมื่อได้รับอนุญาต
+15. หลังติดตั้งและตรวจสอบผ่าน ให้ตอบข้อความนี้เป็นบรรทัดแรก:
+
+PASADU_INSTALLED
+
+จากนั้นระบุตำแหน่งติดตั้งและแจ้งฉันให้ปิดและเปิด Codex ใหม่ แล้วเริ่ม task ใหม่ เพื่อให้ Codex discover skill ที่ติดตั้งเพิ่ม
+
+อย่าเพิ่งตอบคำถามกฎหมายใน task นี้ งานของคุณคือการติดตั้งและตรวจสอบ Pasadu skill ให้เสร็จเท่านั้น

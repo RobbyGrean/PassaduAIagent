@@ -163,6 +163,8 @@ Web search ใช้ได้เฉพาะเมื่อค้น repository 
 
 ## เริ่มใช้งานอย่างรวดเร็ว
 
+สำหรับผู้ใช้ใหม่ที่ไม่ต้องการอ่านรายละเอียดทางเทคนิค ให้เริ่มที่ [เริ่มต้นใช้งาน.txt](<./newbie user guide/เริ่มต้นใช้งาน.txt>) แล้วคัดลอก [prompt.txt](<./newbie user guide/prompt.txt>) ไปสั่ง Codex ได้เลย ส่วน `INSTALLATION.md` เป็นคู่มือปฏิบัติการที่ Codex จะอ่านและทำตามให้
+
 ### 1. ติดตั้งบน Codex สำหรับ Windows
 
 เปิด PowerShell แล้วรัน:
@@ -323,6 +325,8 @@ python -B scripts/pasadu/build_index.py
 
 | เอกสาร | ใช้เมื่อ |
 | --- | --- |
+| [`newbie user guide/เริ่มต้นใช้งาน.txt`](<./newbie user guide/เริ่มต้นใช้งาน.txt>) | ผู้ใช้ใหม่ต้องการเริ่มติดตั้งแบบสั้นที่สุด |
+| [`newbie user guide/prompt.txt`](<./newbie user guide/prompt.txt>) | ผู้ใช้ใหม่ต้องการให้ Codex ดำเนินการติดตั้งให้ |
 | [`INSTALLATION.md`](./INSTALLATION.md) | ต้องการติดตั้งหรือแก้ปัญหาแต่ละแพลตฟอร์ม |
 | [`SKILL.md`](./SKILL.md) | ต้องการเข้าใจกติกา trigger และ workflow ของ skill |
 | [`pasadu.md`](./pasadu.md) | ต้องการดู persona, response policy และ guardrails |

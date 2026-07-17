@@ -7,6 +7,7 @@ Repository: <https://github.com/RobbyGrean/PassaduAIagent>
 ## สารบัญ
 
 - [Quick Start สำหรับ Codex บน Windows](#quick-start-สำหรับ-codex-บน-windows)
+- [วิธีติดตั้งโดยให้ Codex ดำเนินการ](#วิธีติดตั้งโดยให้-codex-ดำเนินการ)
 - [สิ่งที่ถูกติดตั้ง](#สิ่งที่ถูกติดตั้ง)
 - [ข้อกำหนดก่อนติดตั้ง](#ข้อกำหนดก่อนติดตั้ง)
 - [ติดตั้งบน Codex Windows App](#ติดตั้งบน-codex-windows-app)
@@ -54,6 +55,60 @@ $pasadu วิธีเฉพาะเจาะจงใช้ได้ในก
 ```
 
 > Codex ใช้ชื่อ `pasadu` และ `description` จาก YAML frontmatter เพื่อพิจารณา auto-trigger ส่วน `/pasadu` และ `/passadu` เป็น manual trigger ที่ skill รองรับ Enabled skill อาจแสดงใน slash-command list ตามเวอร์ชันและ environment ของ Codex
+
+## วิธีติดตั้งโดยให้ Codex ดำเนินการ
+
+ส่วนนี้ใช้เมื่อผู้ใช้เปิด task แรกแล้ววางเนื้อหาจาก `newbie user guide/prompt.txt` ให้ Codex ดำเนินการติดตั้งแทนผู้ใช้ ผู้ใช้ไม่จำเป็นต้องอ่านหรือคัดลอกคำสั่งจากไฟล์นี้เอง
+
+### เป้าหมายของการติดตั้ง
+
+การติดตั้งถือว่าสำเร็จเมื่อมี repository ครบทั้งชุดอยู่ที่ user-level skill directory และมีไฟล์หลักอยู่ตรงตำแหน่งต่อไปนี้:
+
+```text
+%USERPROFILE%\.codex\skills\pasadu\SKILL.md
+%USERPROFILE%\.codex\skills\pasadu\pasadu.md
+%USERPROFILE%\.codex\skills\pasadu\reference\law\
+%USERPROFILE%\.codex\skills\pasadu\scripts\pasadu\
+```
+
+ห้ามถือว่าสำเร็จเพียงเพราะมีไฟล์ `SKILL.md` ไฟล์เดียว และห้ามติดตั้งเป็นโครงสร้างซ้อน เช่น:
+
+```text
+%USERPROFILE%\.codex\skills\pasadu\PassaduAIagent\SKILL.md
+```
+
+### ลำดับงานที่ Codex ต้องทำ
+
+เมื่อได้รับคำสั่งติดตั้งจาก `prompt.txt` ให้ Codex ทำตามลำดับนี้:
+
+1. อ่าน `INSTALLATION.md` ฉบับเต็มจาก repository ก่อนลงมือ
+2. ตรวจระบบปฏิบัติการและว่ามี Git หรือไม่
+3. ตรวจ `%USERPROFILE%\.codex\skills\pasadu`
+4. ถ้ายังไม่มีโฟลเดอร์ปลายทาง ให้ clone repository ทั้งชุดจาก `https://github.com/RobbyGrean/PassaduAIagent.git`
+5. ถ้ามี repository ที่ถูกต้องอยู่แล้ว ให้ใช้ `git pull --ff-only` แทนการ clone ซ้ำ
+6. ถ้าปลายทางมีไฟล์อยู่แต่ไม่ใช่ repository นี้ ห้ามลบหรือเขียนทับเอง ให้รายงานปัญหาและขออนุญาตผู้ใช้ก่อน
+7. ตรวจไฟล์หลักและโครงสร้างด้วย `Test-Path` ตามหัวข้อ [ตรวจสอบการติดตั้ง](#ตรวจสอบการติดตั้ง)
+8. รายงานผลตามจริง ถ้าคำสั่งใดล้มเหลวต้องระบุคำสั่งและสาเหตุ ห้ามรายงานว่าสำเร็จจากการคาดเดา
+
+### สิ่งที่ Codex ห้ามทำระหว่างติดตั้ง
+
+- ห้ามแก้ไข `reference/`, `data/index/`, `evals/` หรือเอกสารกฎหมายเพื่อให้ติดตั้งผ่าน
+- ห้าม clone เฉพาะ `SKILL.md` หรือคัดลอกเฉพาะไฟล์บางส่วน
+- ห้ามติดตั้งไปยัง workspace ชั่วคราวแล้วอ้างว่าเป็น user-level skill
+- ห้ามถามให้ผู้ใช้คัดลอกคำสั่งทีละบรรทัด หาก Codex สามารถดำเนินการคำสั่งตามเอกสารได้
+- ห้ามข้ามการปิดและเปิด Codex ใหม่หลังติดตั้ง
+
+### ผลลัพธ์ที่ต้องแจ้งผู้ใช้
+
+หลังตรวจไฟล์ครบ ให้แจ้งสรุปสั้น ๆ ว่า:
+
+```text
+PASADU_INSTALLED
+ตำแหน่ง: %USERPROFILE%\.codex\skills\pasadu
+ขั้นตอนถัดไป: ปิดและเปิด Codex ใหม่ แล้วเริ่ม task ใหม่
+```
+
+หลังผู้ใช้เปิด Codex ใหม่และเริ่ม task ใหม่แล้ว จึงถือว่า skill พร้อม discover และใช้งานได้ ผู้ใช้สามารถถามคำถามพัสดุตามธรรมชาติ หรือใช้ `/pasadu` หาก environment แสดง alias นี้
 
 ## สิ่งที่ถูกติดตั้ง
 
