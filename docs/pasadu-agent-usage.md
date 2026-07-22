@@ -101,6 +101,7 @@ reference/law/rbb60.md
 scripts/pasadu/build_index.py
 scripts/pasadu/route_query.py
 scripts/pasadu/retrieve.py
+scripts/pasadu/evidence_packet.py
 scripts/pasadu/answer_context.py
 scripts/pasadu/cite_check.py
 scripts/pasadu/eval_queries.py
@@ -109,7 +110,8 @@ scripts/pasadu/eval_queries.py
 แนวคิดคือ:
 
 ```text
-route ก่อน retrieve
+ใช้ evidence packet เพื่อ route และตรวจ primary/fallback ใน process เดียว
+reuse packet เดิมเมื่อเป็น follow-up ประเด็นเดิม
 retrieve เฉพาะมาตรา/ข้อที่เกี่ยวข้อง
 ตอบพร้อม citation
 ตรวจ citation ว่ามีจริง
@@ -703,6 +705,7 @@ reference/law/prb60.md
 - `build_index.py`: แตกเอกสารเป็น chunks
 - `route_query.py`: เลือก source หลักและ fallback
 - `retrieve.py`: ค้นมาตรา/ข้อที่เกี่ยวข้อง
+- `evidence_packet.py`: entry point หลักที่ route และตรวจ primary/fallback ครั้งเดียวโดยไม่ใช้ subagent
 - `answer_context.py`: รวม policy + คำถาม + reference ที่ค้นเจอ
 - `cite_check.py`: ตรวจว่า citation มีจริง
 - `eval_queries.py`: smoke test ว่า routing ยังถูก
@@ -787,8 +790,8 @@ Agent อาจต้องถามเพิ่ม เช่น:
 
 1. ถ้าคำถามมี trigger ด้านพัสดุ ให้ใช้ Pasadu แม้ผู้ใช้ไม่พิมพ์ `/pasadu`
 2. อ่าน `pasadu.md` ก่อนตอบ
-3. ใช้ retrieval scripts ถ้าพร้อมใช้งาน
-4. route ก่อน retrieve ห้ามอ่านทั้งเล่มโดยไม่จำเป็น
+3. ใช้ `evidence_packet.py` ครั้งเดียวสำหรับคำถามใหม่ และ reuse packet สำหรับ follow-up ประเด็นเดิม
+4. งานค้นคืนและวิเคราะห์ทั่วไปอยู่ในบทสนทนาหลัก; ใช้ complex specialist เฉพาะเมื่อมีความขัดแย้งหรือความกำกวมสำคัญ
 5. citation ที่แสดงผู้ใช้ต้องมีชื่อกฎหมาย/ระเบียบ/กฎกระทรวง/หนังสือเวียน และเลขมาตรา/ข้อ/หัวข้อ ห้ามแสดงชื่อไฟล์ภายใน repo
 6. ถ้าไม่พบ citation จริง ให้บอกว่าไม่พบ
 7. คำถามกำกวมให้ถามกลับ ไม่เดา

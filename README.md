@@ -126,7 +126,7 @@ Pasadu ใช้ root session เป็นตัวประสานงาน �
 | สถานการณ์ | เส้นทางที่ใช้ | ผลลัพธ์ที่คาดหวัง |
 | --- | --- | --- |
 | ต้องการมาตรา ข้อ หรือขั้นตอนที่ระบุชัด | Direct retrieval | สรุปจาก evidence packet พร้อม citation |
-| ต้องวิเคราะห์ว่ากฎหมายใช้กับกรณีนี้อย่างไร | Legal analyst | แยกหลักกฎหมาย ข้อเท็จจริง เงื่อนไข และข้อสรุป |
+| ต้องวิเคราะห์ว่ากฎหมายใช้กับกรณีนี้อย่างไร | Root session + evidence packet | แยกหลักกฎหมาย ข้อเท็จจริง เงื่อนไข และข้อสรุปโดยไม่ส่งต่องาน |
 | มีหลายบทต้องอ่านประกอบกัน หรือมีความกำกวมสำคัญ | Complex analyst | อธิบายจุดขัดแย้ง สมมติฐาน และความไม่แน่นอนอย่างชัดเจน |
 | ค้นแล้วไม่มีหลักฐานเพียงพอ | Safe failure | แจ้งข้อมูลที่ขาด โดยไม่แต่งคำตอบขึ้นเอง |
 
@@ -134,7 +134,7 @@ Pasadu ใช้ root session เป็นตัวประสานงาน �
 
 Pasadu ต้อง route และค้นจาก repository ก่อนเสมอ โดยตรวจ source หลักและ fallback source ที่กำหนดไว้ใน routing policy ให้ครบ หาก repository มีหลักฐานเพียงพอ ให้ตอบจาก repository และไม่เพิ่ม web source
 
-Web search ใช้ได้เฉพาะเมื่อค้น repository ตามปกติแล้ว ตรวจ primary/fallback ครบแล้ว และหลักฐานยังไม่พอหรือไม่มีเอกสารที่เกี่ยวข้อง หากข้อเท็จจริงยังขาดจนต้องถามผู้ใช้ ให้ถามก่อนและยังไม่ใช้ web search การ fallback นี้เป็นการค้นแบบอ่านอย่างเดียวโดย root orchestrator; retriever และ analyst ไม่ค้นเว็บเอง
+Web search ใช้ได้เฉพาะเมื่อค้น repository ตามปกติแล้ว ตรวจ primary/fallback ครบแล้ว และหลักฐานยังไม่พอหรือไม่มีเอกสารที่เกี่ยวข้อง หากข้อเท็จจริงยังขาดจนต้องถามผู้ใช้ ให้ถามก่อนและยังไม่ใช้ web search การ fallback นี้เป็นการค้นแบบอ่านอย่างเดียวโดยบทสนทนาหลัก; complex specialist ไม่ค้นเว็บเอง
 
 ถ้า repository ตอบได้เพียงบางส่วน ต้องแบ่งคำตอบเป็น `Repository source` และ `Web source` ห้ามผสม citation หรือทำให้ web source ดูเหมือนเป็นเอกสารใน repository
 
@@ -153,8 +153,8 @@ Web search ใช้ได้เฉพาะเมื่อค้น repository 
 | ช่วงทำงาน | โมเดล | เหตุผลการตั้งค่า |
 | --- | --- | --- |
 | รับคำถาม / root session | `inherit` | ใช้โมเดลและ reasoning ที่ผู้ใช้หรือ Codex เลือกไว้ |
-| `legal_retriever` | `gpt-5.6-luna` / high | ค้นและคัดหลักฐานจาก repository |
-| `legal_analyst` | `gpt-5.6-luna` / high | วิเคราะห์การใช้กฎหมายกับข้อเท็จจริง |
+| Evidence retrieval | Python / deterministic | ค้น primary และ fallback ใน process เดียว ไม่มี model call |
+| การวิเคราะห์ทั่วไป | root session | ใช้ evidence packet ในบทสนทนาเดิมและ reuse หลักฐานใน follow-up |
 | `legal_analyst_complex` | `gpt-5.6-luna` / high | วิเคราะห์ความขัดแย้ง ความกำกวม และหลายบทบัญญัติ |
 
 ค่าดังกล่าวกำหนดใน [`.codex/config.toml`](./.codex/config.toml) และ [`.codex/agents/`](./.codex/agents/)
@@ -194,6 +194,16 @@ $pasadu มาตรา 56 ใช้กรณีใด
 คู่มือติดตั้งฉบับเต็มครอบคลุม Codex Windows App, Codex CLI, ChatGPT Work, Gemini CLI และ Claude Code:
 
 ➡️ **[อ่าน INSTALLATION.md](./INSTALLATION.md)**
+
+### ติดตั้งด้วย Skills CLI (แนะนำ)
+
+ตรวจสอบแล้วว่า Skills CLI พบ root skill ชื่อ `pasadu` และติดตั้งแบบ copy ทั้งโฟลเดอร์ประกอบของ repository ได้ ให้รันแบบ global/non-interactive:
+
+```powershell
+npx skills add RobbyGrean/PassaduAIagent --skill pasadu -g -y
+```
+
+คำสั่งนี้ติดตั้ง `SKILL.md` พร้อม `pasadu.md`, `reference/`, `scripts/`, `data/`, `evals/`, `tests/` และไฟล์ตั้งค่าที่ skill ใช้ ไม่ใช่คัดลอกเฉพาะไฟล์เดียว
 
 ### ข้อกำหนดขั้นต่ำ
 

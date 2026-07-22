@@ -192,7 +192,12 @@ def route_query(query: str) -> dict[str, object]:
     explicit_prb = has_clause_reference(query, "มาตรา") or any(
         keyword.lower() in q for keyword in ["พรบ", "พ.ร.บ", "พระราชบัญญัติ"]
     )
-    explicit_rbb = has_clause_reference(query, "ข้อ") or "ระเบียบ" in q
+    explicit_rbb = (
+        has_clause_reference(query, "ข้อ")
+        or "ระเบียบ" in q
+        or "ข้อไหน" in q
+        or "ข้อใด" in q
+    )
     prb_first_contract = any(keyword.lower() in q for keyword in PRB_FIRST_CONTRACT_KEYWORDS)
     has_rbb3_direct = is_rbb3_clause_reference(query) or any(
         keyword.lower() in q for keyword in RBB3_DIRECT_KEYWORDS

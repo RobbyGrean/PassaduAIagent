@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import re
+import unicodedata
 from pathlib import Path
 
 
@@ -42,10 +43,39 @@ SOURCE_DISPLAY_NAMES = {
 THAI_DIGITS = str.maketrans("๐๑๒๓๔๕๖๗๘๙", "0123456789")
 CLAUSE_NUMBER_PATTERN = r"[0-9๐-๙]+(?:/[0-9๐-๙]+)?"
 REFERENCE_SECTION_NUMBER_PATTERN = r"[0-9๐-๙]+(?:(?:/|\.)[0-9๐-๙]+)*"
+QUESTION_PREFIXES = ("/pasadu", "/passadu", "ในระเบียบ", "ตามระเบียบ")
+QUESTION_TAIL_MARKERS = (
+    "อยู่ข้อไหน",
+    "เขียนว่าอะไร",
+    "กล่าวว่าอะไร",
+    "กล่าวถึงอะไร",
+    "คืออะไร",
+    "ได้เท่าไหร่",
+    "ได้ไม่เกินเท่าไหร่",
+    "ต้องทำอย่างไร",
+    "ทำอย่างไร",
+    "หรือไม่",
+    "ไหม",
+    "ถ้า",
+)
+GENERIC_DOMAIN_SUFFIXES = ("พัสดุ", "วัสดุ")
 
 
 def normalize_digits(text: str) -> str:
     return text.translate(THAI_DIGITS)
+
+
+def normalize_search_text(text: str) -> str:
+    normalized = unicodedata.normalize("NFD", normalize_digits(text.lower()))
+    return normalized.replace("ำ", "ํา")
+
+
+def character_ngrams(text: str, size: int = 4) -> set[str]:
+    compact = re.sub(r"[^a-z0-9ก-๙]+", "", normalize_search_text(text))
+    return {
+        compact[index : index + size]
+        for index in range(max(0, len(compact) - size + 1))
+    }
 
 
 def compact_whitespace(text: str) -> str:
@@ -80,5 +110,28 @@ def format_citation(source: str, clause_type: str, clause_no: object) -> str:
 
 
 def tokenize(text: str) -> list[str]:
-    normalized = normalize_digits(text.lower())
+    normalized = normalize_search_text(text)
     return re.findall(r"[a-z0-9]+|[ก-๙]+", normalized)
+
+
+def focus_phrases(query: str) -> list[str]:
+    """Extract Thai subject phrases without requiring a Thai word segmenter."""
+    normalized = normalize_search_text(query)
+    for prefix in QUESTION_PREFIXES:
+        normalized = normalized.replace(prefix, " ")
+
+    phrases: list[str] = []
+    for token in tokenize(normalized):
+        phrase = token
+        for marker in QUESTION_TAIL_MARKERS:
+            marker_at = phrase.find(marker)
+            if marker_at >= 0:
+                phrase = phrase[:marker_at]
+        if len(phrase) >= 4 and phrase not in phrases:
+            phrases.append(phrase)
+        for suffix in GENERIC_DOMAIN_SUFFIXES:
+            if phrase.endswith(suffix):
+                shorter = phrase[: -len(suffix)]
+                if len(shorter) >= 4 and shorter not in phrases:
+                    phrases.append(shorter)
+    return phrases

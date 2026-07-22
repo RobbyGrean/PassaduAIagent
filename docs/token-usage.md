@@ -19,12 +19,12 @@ So the expensive part is not the size of `chunks.json` on disk. The expensive pa
 
 `answer_context.py` now uses compact rules by default. It preserves the same routing and retrieval workflow, but it does not inject the full `pasadu.md` into every generated context block.
 
-When Pasadu is invoked for the first time in a new thread, the agent should briefly tell the user there are two modes:
+Pasadu uses compact mode silently by default:
 
 - `compact` is the default and is recommended for normal questions.
 - `full rules` is available when the user wants the full `pasadu.md` rules included.
 
-If the user asks a direct legal question without choosing a mode, proceed with `compact` instead of blocking the answer.
+Do not ask the user to choose a mode or announce the mode for a direct legal question. Use full rules only when explicitly requested for an audit.
 
 Default:
 
@@ -54,7 +54,8 @@ This is more expensive because it includes the full `pasadu.md` text plus retrie
 
 For token-efficient Codex chat:
 
-1. Use `retrieve.py` for direct search when possible.
-2. Use `answer_context.py` default mode when a ready-made answer context is useful.
-3. Avoid reading `data/index/chunks.json` directly into chat.
-4. Keep `--limit` small unless the question truly needs broader retrieval.
+1. Use `evidence_packet.py` as the default single-pass retrieval entry point.
+2. Reuse the prior verified packet for a same-issue follow-up.
+3. Use `answer_context.py` default mode only when a ready-made answer context is useful.
+4. Avoid reading `data/index/chunks.json` directly into chat.
+5. Keep `--limit` small unless the question truly needs broader retrieval.

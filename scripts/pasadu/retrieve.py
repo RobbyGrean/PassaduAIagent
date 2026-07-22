@@ -8,9 +8,12 @@ import re
 from common import (
     INDEX_ROOT,
     REFERENCE_SECTION_NUMBER_PATTERN,
+    character_ngrams,
     display_source,
+    focus_phrases,
     format_citation,
     normalize_digits,
+    normalize_search_text,
     read_json,
     tokenize,
 )
@@ -60,7 +63,6 @@ DOMAIN_KEYWORDS = [
     "ไม่เข้าข่ายที่จะใช้สิทธิอุทธรณ์",
 ]
 
-
 def requested_clause(query: str) -> tuple[str, str] | None:
     match = re.search(rf"(มาตรา|ข้อ|หัวข้อ)\s*({REFERENCE_SECTION_NUMBER_PATTERN})", query)
     if not match:
@@ -69,9 +71,13 @@ def requested_clause(query: str) -> tuple[str, str] | None:
     return label, normalize_digits(number)
 
 
-def score_chunk(query_tokens: list[str], chunk: dict[str, object]) -> float:
+def score_chunk(
+    query_tokens: list[str],
+    query_phrases: list[str],
+    chunk: dict[str, object],
+) -> float:
     text = str(chunk.get("search_text", ""))
-    text_lower = text.lower()
+    text_lower = normalize_search_text(text)
     tokens = tokenize(text)
     if not tokens:
         return 0.0
@@ -86,8 +92,8 @@ def score_chunk(query_tokens: list[str], chunk: dict[str, object]) -> float:
         if count:
             score += 1.0 + math.log(count)
 
-    title = str(chunk.get("title", "")).lower()
-    heading = " ".join(chunk.get("heading_path", [])).lower()
+    title = normalize_search_text(str(chunk.get("title", "")))
+    heading = normalize_search_text(" ".join(chunk.get("heading_path", [])))
     for token in query_tokens:
         if token in title:
             score += 3.0
@@ -96,9 +102,23 @@ def score_chunk(query_tokens: list[str], chunk: dict[str, object]) -> float:
         if len(token) > 3 and token in text_lower:
             score += 2.0
 
+    for phrase in query_phrases:
+        if phrase in text_lower:
+            score += 12.0 + min(len(phrase), 20)
+        if phrase in title:
+            score += 8.0
+        if phrase in heading:
+            score += 6.0
+
+        phrase_grams = character_ngrams(phrase)
+        if phrase_grams:
+            overlap = sum(gram in text_lower for gram in phrase_grams) / len(phrase_grams)
+            if overlap >= 0.45:
+                score += overlap * 12.0
+
     query_joined = " ".join(query_tokens)
     for keyword in DOMAIN_KEYWORDS:
-        keyword_lower = keyword.lower()
+        keyword_lower = normalize_search_text(keyword)
         if keyword_lower in query_joined and keyword_lower in text_lower:
             score += 8.0
             if keyword_lower in title:
@@ -106,13 +126,13 @@ def score_chunk(query_tokens: list[str], chunk: dict[str, object]) -> float:
             if keyword_lower in heading:
                 score += 4.0
     if (
-        "อุทธรณ์" in query_joined
+        normalize_search_text("อุทธรณ์") in query_joined
         and chunk.get("source") == "reference/law/prb60.md"
         and normalize_digits(str(chunk.get("clause_no", ""))) in {"114", "115", "116", "117", "118", "119"}
     ):
         score += 20.0
     if (
-        any(keyword in query_joined for keyword in ["เฉพาะเจาะจง", "เจาะจง"])
+        any(normalize_search_text(keyword) in query_joined for keyword in ["เฉพาะเจาะจง", "เจาะจง"])
         and chunk.get("source") == "reference/law/prb60.md"
         and normalize_digits(str(chunk.get("clause_no", ""))) == "56"
     ):
@@ -120,17 +140,46 @@ def score_chunk(query_tokens: list[str], chunk: dict[str, object]) -> float:
     source = chunk.get("source")
     clause_no = normalize_digits(str(chunk.get("clause_no", "")))
     if source == "reference/law/ministerial-regulations/mr-specific-2560.md":
-        if "ไม่ทำข้อตกลงเป็นหนังสือ" in query_joined and clause_no == "4":
+        if normalize_search_text("ไม่ทำข้อตกลงเป็นหนังสือ") in query_joined and clause_no == "4":
             score += 20.0
-        if any(keyword in query_joined for keyword in ["กรรมการตรวจรับคนเดียว", "ผู้ตรวจรับพัสดุคนเดียว"]) and clause_no == "5":
+        if any(normalize_search_text(keyword) in query_joined for keyword in ["กรรมการตรวจรับคนเดียว", "ผู้ตรวจรับพัสดุคนเดียว"]) and clause_no == "5":
             score += 20.0
     if (
         source == "reference/law/ministerial-regulations/mr-appeal-exclusions-2568.md"
-        and any(keyword in query_joined for keyword in ["อุทธรณ์ไม่ได้", "กฎกระทรวงอุทธรณ์"])
+        and any(normalize_search_text(keyword) in query_joined for keyword in ["อุทธรณ์ไม่ได้", "กฎกระทรวงอุทธรณ์"])
         and clause_no == "3"
     ):
         score += 20.0
     return score
+
+
+def lead_in_bonuses(
+    candidates: list[dict[str, object]],
+    query_phrases: list[str],
+) -> dict[object, float]:
+    bonuses: dict[object, float] = {}
+    for index, chunk in enumerate(candidates[:-1]):
+        next_chunk = candidates[index + 1]
+        if chunk.get("source") != next_chunk.get("source"):
+            continue
+        text_lines = str(chunk.get("text", "")).strip().splitlines()
+        text_end = normalize_search_text(text_lines[-1]) if text_lines else ""
+        if len(text_end) > 80:
+            continue
+        for phrase in query_phrases:
+            common_suffix = 0
+            for left, right in zip(reversed(text_end), reversed(phrase)):
+                if left != right:
+                    break
+                common_suffix += 1
+            if text_end.endswith(phrase) or common_suffix >= 4:
+                next_id = next_chunk.get("id")
+                bonuses[next_id] = (
+                    bonuses.get(next_id, 0.0)
+                    + 80.0
+                    + min(common_suffix, 20) * 4.0
+                )
+    return bonuses
 
 
 def search_chunks(
@@ -155,8 +204,15 @@ def search_chunks(
             return primary_direct[:limit]
 
     query_tokens = tokenize(query)
+    query_phrases = focus_phrases(query)
+    lead_in_bonus = lead_in_bonuses(candidates, query_phrases)
+
     scored = [
-        (score_chunk(query_tokens, chunk), chunk)
+        (
+            score_chunk(query_tokens, query_phrases, chunk)
+            + lead_in_bonus.get(chunk.get("id"), 0.0),
+            chunk,
+        )
         for chunk in candidates
     ]
     scored.sort(key=lambda item: item[0], reverse=True)

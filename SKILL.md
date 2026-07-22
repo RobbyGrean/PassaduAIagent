@@ -51,6 +51,7 @@ When available, use the repository scripts to avoid reading entire reference fil
 - `scripts/pasadu/build_index.py` builds `data/index/*.json` from every registered reference source.
 - `scripts/pasadu/route_query.py` decides the primary source and fallback source.
 - `scripts/pasadu/retrieve.py` returns the most relevant clauses with internal source metadata and clause citations; user-facing answers must translate the source into the legal authority's name.
+- `scripts/pasadu/evidence_packet.py` is the default entry point. It routes once, checks primary and fallback sources in one process, and returns bounded evidence for the main conversation.
 - `scripts/pasadu/answer_context.py` builds an LLM-ready context from `pasadu.md`, the user question, and retrieved references.
 - `scripts/pasadu/cite_check.py` checks whether final citations exist in the index.
 
@@ -104,16 +105,16 @@ Use both files when the question needs both the Act's authority and the Regulati
 
 ## Answer Workflow
 
-1. Classify the issue.
-2. Decide whether the user needs a short text-only answer or a practical diagnosis.
-3. For complex questions, ask first whether the user wants:
+1. If this is a same-issue follow-up and the prior verified evidence packet already contains the controlling provision, reuse it. Do not retrieve it again.
+2. Otherwise run `evidence_packet.py` once. Routine retrieval must not use a subagent.
+3. Classify the issue and decide whether the user needs a short text-only answer or a practical diagnosis.
+4. For complex questions, ask first whether the user wants:
    - ตอบตามตัวบทเท่านั้น
    - ตอบเชิงปฏิบัติโดยอ้างคู่มือ/แนววินิจฉัยประกอบ
-4. Search the primary reference source using the routing policy.
-5. Search every configured fallback source before deciding that the repository lacks evidence.
-6. Identify the exact section or clause.
-7. Answer from the repository evidence when it fully answers the question.
-8. If the repository result is `partial` or `not_found` after primary and fallback retrieval, and no missing-fact question must be answered first, the root orchestrator may enter the web search fallback described below.
+5. Confirm the packet checked the routed primary and fallback sources and identified the exact section or clause.
+6. Answer direct, procedural, and ordinary conditional questions in the main conversation.
+7. Use one complex specialist only for material conflict, unresolved ambiguity, multi-provision reconciliation, or a difficult fact-to-law chain.
+8. If the repository result is `partial` or `not_found` after primary and fallback retrieval, and no missing-fact question must be answered first, the main conversation may enter the web search fallback described below.
 9. Ask concise clarification questions if facts are missing; do not use web search to fill missing facts.
 10. State uncertainty when the reference does not fully answer the question.
 
@@ -124,7 +125,7 @@ For direct questions such as "มาตรา 56 คืออะไร", "ข้
 - Do not invent law.
 - Do not cite a section or clause that was not found.
 - Do not silently rely on outside legal sources. Web search is allowed only as the explicit fallback after repository routing, primary retrieval, and configured fallback retrieval are complete.
-- `legal_retriever`, `legal_analyst`, and `legal_analyst_complex` must never browse the web. Only the inherited root orchestrator may run the fallback search.
+- Retrieval and ordinary analysis stay in the main conversation. The optional `legal_analyst_complex` specialist must never browse the web; only the main conversation may run the fallback search.
 - If the repository supports only part of an answer, separate `Repository source` and `Web source` sections and keep citations visibly distinct.
 - Every answer using web search must begin with exactly: `คำตอบนี้ใช้ข้อมูลจาก web search ไม่ได้ใช้ฐานข้อมูลของ repository ข้อมูลมีโอกาสคลาดเคลื่อน โปรดตรวจสอบกับแหล่งทางการอีกครั้ง`
 - For each web source, show the owning website or agency, direct URL, access date when available, the verified title of the Act, Regulation, ministerial regulation, circular, or announcement, and the verified section, clause, heading, or document number. Label it `web source`.
@@ -190,16 +191,17 @@ For diagnosis, use this shape:
 
 ## Context Mode Choice
 
-At the first Pasadu interaction in a new thread, briefly tell the user that two context modes are available:
+Use compact context silently by default:
 
 - `compact` keeps the same routing/retrieval workflow but uses compact operating rules to save tokens. This is the default.
 - `full rules` includes the full `pasadu.md` rules in the generated answer context. Use it when the user wants maximum instruction detail or is auditing behavior.
 
-Do not block direct legal questions just to ask this. If the user has not chosen a mode, proceed with `compact` and mention once that they can request `full rules` anytime.
+Do not block or add a mode announcement to direct legal questions. Use `full rules` only when the user explicitly requests it or is auditing behavior.
 
 For script usage:
 
 ```powershell
+python scripts\pasadu\evidence_packet.py "question" --limit 3
 python scripts\pasadu\answer_context.py "question"
 python scripts\pasadu\answer_context.py "question" --full-rules
 ```

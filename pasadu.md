@@ -117,14 +117,14 @@
 
 ## Web search fallback
 
-การค้นเว็บเป็น fallback ของ root orchestrator เท่านั้น ไม่ใช่ขั้นตอนเริ่มต้น และ `legal_retriever`, `legal_analyst`, `legal_analyst_complex` ห้ามค้นเว็บเอง
+การค้นเว็บเป็น fallback ของบทสนทนาหลักเท่านั้น ไม่ใช่ขั้นตอนเริ่มต้น งานค้นคืนและการวิเคราะห์ทั่วไปต้องทำในบทสนทนาหลักโดยใช้ evidence packet แบบ deterministic ส่วน `legal_analyst_complex` ซึ่งเรียกได้เฉพาะกรณีซับซ้อนจริงห้ามค้นเว็บเอง
 
 ให้เข้าสู่ web search ได้ต่อเมื่อทำครบทุกข้อ:
 
 1. route คำถามตาม policy นี้แล้ว
 2. ค้น source หลักและ fallback source ที่ route ระบุใน repository แล้ว
 3. หลักฐานจาก repository เป็น `partial` หรือ `not_found` สำหรับประเด็นที่ผู้ใช้ถาม และไม่มีคำถามข้อเท็จจริงที่ต้องรอคำตอบจากผู้ใช้
-4. ถ้า analyst ระบุ `insufficient_evidence` ต้องทำ targeted repository retrieval ได้ไม่เกินหนึ่งครั้งก่อนเข้า fallback
+4. ถ้าหลักฐานยังไม่พอ ให้ทำ targeted deterministic repository retrieval ได้ไม่เกินหนึ่งครั้งก่อนเข้า fallback
 
 ถ้าได้ `needs_scope_check` หรือ `insufficient_facts` ให้ถามกลับและหยุดก่อน ไม่ใช้เว็บเติมข้อเท็จจริงที่ขาด หาก repository ตอบได้ครบ ให้ตอบจาก repository เท่านั้น
 

@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 
 from common import REPO_ROOT, display_source, format_citation, read_text
-from retrieve import retrieve
+from evidence_packet import build_evidence_packet
 
 
 COMPACT_RULES = """\
@@ -32,9 +32,10 @@ def load_rules(full_rules: bool) -> str:
     return COMPACT_RULES.strip()
 
 
-def build_context(query: str, limit: int = 5, full_rules: bool = False) -> str:
+def build_context(query: str, limit: int = 3, full_rules: bool = False) -> str:
     rules = load_rules(full_rules)
-    retrieved = retrieve(query, limit=limit)
+    packet = build_evidence_packet(query, limit=limit)
+    retrieved = {"route": packet["route"], "results": packet["evidence"]}
     lines = [
         "# Pasadu Answer Context",
         "",
@@ -45,6 +46,7 @@ def build_context(query: str, limit: int = 5, full_rules: bool = False) -> str:
         f"authorities: {', '.join(display_source(source) for source in retrieved['route'].get('sources', []))}",
         f"fallback_authorities: {', '.join(display_source(source) for source in retrieved['route'].get('fallback_sources', []))}",
         f"used_fallback: {retrieved['route'].get('used_fallback', False)}",
+        f"checked_authorities: {', '.join(display_source(source) for source in packet['repository_check']['checked_sources'])}",
         "",
         "## User Question",
         query,
@@ -75,7 +77,7 @@ def build_context(query: str, limit: int = 5, full_rules: bool = False) -> str:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Build the context block for an LLM answer.")
     parser.add_argument("query", help="User question")
-    parser.add_argument("--limit", type=int, default=5)
+    parser.add_argument("--limit", type=int, default=3)
     parser.add_argument(
         "--full-rules",
         action="store_true",

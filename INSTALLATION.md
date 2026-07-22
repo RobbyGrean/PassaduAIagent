@@ -28,6 +28,18 @@ Repository: <https://github.com/RobbyGrean/PassaduAIagent>
 
 เปิด PowerShell แล้วรัน:
 
+### วิธีแนะนำ: Skills CLI
+
+ตรวจสอบแล้วด้วย `npx skills add RobbyGrean/PassaduAIagent --list` ว่า repository นี้มี root skill ชื่อ `pasadu` และ CLI แสดงการติดตั้งแบบ copy ทั้งโฟลเดอร์ประกอบ ให้ติดตั้งแบบ global/non-interactive ด้วยคำสั่งนี้:
+
+```powershell
+npx skills add RobbyGrean/PassaduAIagent --skill pasadu -g -y
+```
+
+Skills CLI จะติดตั้งทั้งชุดที่ skill ต้องใช้ (`SKILL.md`, `pasadu.md`, `reference/`, `scripts/`, `data/`, `evals/`, `tests/` และไฟล์ตั้งค่า) ไม่ใช่เฉพาะ `SKILL.md` เท่านั้น
+
+หากต้องการติดตั้งด้วย Git โดยตรง ให้ใช้คำสั่งเดิมด้านล่าง:
+
 ```powershell
 New-Item -ItemType Directory -Force "$env:USERPROFILE\.codex\skills" | Out-Null
 git clone https://github.com/RobbyGrean/PassaduAIagent.git "$env:USERPROFILE\.codex\skills\pasadu"

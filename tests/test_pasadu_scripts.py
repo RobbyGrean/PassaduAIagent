@@ -9,8 +9,9 @@ sys.path.insert(0, str(SCRIPT_DIR))
 
 from build_index import build_index
 from cite_check import check_citations
-from common import format_citation
+from common import format_citation, normalize_digits
 from answer_context import build_context
+from evidence_packet import build_evidence_packet
 from retrieve import retrieve
 from route_query import route_query
 
@@ -182,6 +183,100 @@ class PasaduScriptTests(unittest.TestCase):
         self.assertEqual(top["source"], "reference/law/prb60.md")
         self.assertEqual(top["clause_type"], "มาตรา")
         self.assertEqual(top["clause_no"], "56")
+
+    def test_retrieve_thai_phrase_question_prioritizes_advance_payment(self):
+        result = retrieve(
+            "ในระเบียบ การจ่ายเงินล่วงหน้าอยู่ข้อไหนเขียนว่าอะไร",
+            limit=3,
+        )
+        top = result["results"][0]
+        self.assertEqual(top["source"], "reference/law/rbb60.md")
+        self.assertEqual(normalize_digits(str(top["clause_no"])), "89")
+
+    def test_retrieve_advance_payment_follow_up_prioritizes_clause_89(self):
+        result = retrieve(
+            "จ่ายเงินล่วงหน้าได้เท่าไหร่ ถ้าผมจะสั่งซื้อวัสดุ",
+            limit=3,
+        )
+        top = result["results"][0]
+        self.assertEqual(top["source"], "reference/law/rbb60.md")
+        self.assertEqual(normalize_digits(str(top["clause_no"])), "89")
+
+    def test_retrieve_normalizes_thai_sara_am(self):
+        for query, expected_clause in [
+            ("การตรวจสอบพัสดุประจำปีอยู่ข้อไหน", "213"),
+            ("การจำหน่ายพัสดุอยู่ข้อไหน", "215"),
+        ]:
+            with self.subTest(query=query):
+                top = retrieve(query, limit=3)["results"][0]
+                self.assertEqual(normalize_digits(str(top["clause_no"])), expected_clause)
+
+    def test_retrieve_matches_thai_phrase_with_inserted_qualifier(self):
+        top = retrieve("ค่าจ้างที่ปรึกษาล่วงหน้าอยู่ข้อไหน", limit=3)["results"][0]
+        self.assertEqual(normalize_digits(str(top["clause_no"])), "130")
+
+    def test_retrieve_ignores_generic_supply_suffix_for_topic_heading(self):
+        top = retrieve("การแลกเปลี่ยนพัสดุอยู่ข้อไหน", limit=3)["results"][0]
+        self.assertEqual(normalize_digits(str(top["clause_no"])), "96")
+
+    def test_regulation_topic_matrix_keeps_expected_clause_in_evidence(self):
+        cases = {
+            "รายงานขอซื้อหรือขอจ้างอยู่ข้อไหน": "22",
+            "คณะกรรมการซื้อหรือจ้างอยู่ข้อไหน": "25",
+            "วิธีเฉพาะเจาะจงอยู่ข้อไหน": "78",
+            "การเช่าอยู่ข้อไหน": "92",
+            "การเช่าอสังหาริมทรัพย์อยู่ข้อไหน": "93",
+            "การแลกเปลี่ยนพัสดุอยู่ข้อไหน": "96",
+            "ค่าจ้างที่ปรึกษาล่วงหน้าอยู่ข้อไหน": "130",
+            "หลักประกันการเสนอราคาอยู่ข้อไหน": "166",
+            "หลักประกันสัญญาอยู่ข้อไหน": "167",
+            "หลักประกันการรับเงินล่วงหน้าอยู่ข้อไหน": "172",
+            "การบริหารสัญญาและการตรวจรับพัสดุอยู่ข้อไหน": "175",
+            "การประเมินผลการปฏิบัติงานของผู้ประกอบการอยู่ข้อไหน": "190",
+            "การลงโทษให้เป็นผู้ทิ้งงานอยู่ข้อไหน": "192",
+            "การตรวจสอบพัสดุประจำปีอยู่ข้อไหน": "213",
+            "การจำหน่ายพัสดุอยู่ข้อไหน": "215",
+            "การร้องเรียนอยู่ข้อไหน": "220",
+        }
+        for query, expected_clause in cases.items():
+            with self.subTest(query=query):
+                clauses = {
+                    normalize_digits(str(item["clause_no"]))
+                    for item in retrieve(query, limit=3)["results"]
+                }
+                self.assertIn(expected_clause, clauses)
+
+    def test_clause_question_routes_contract_administration_to_regulation(self):
+        result = retrieve(
+            "การบริหารสัญญาและการตรวจรับพัสดุอยู่ข้อไหน",
+            limit=3,
+        )
+        self.assertEqual(result["results"][0]["source"], "reference/law/rbb60.md")
+        self.assertEqual(
+            normalize_digits(str(result["results"][0]["clause_no"])),
+            "175",
+        )
+
+    def test_evidence_packet_checks_primary_and_fallback_without_agent(self):
+        packet = build_evidence_packet(
+            "จ่ายเงินล่วงหน้าได้เท่าไหร่ ถ้าผมจะสั่งซื้อวัสดุ",
+            limit=3,
+        )
+        self.assertEqual(packet["packet_version"], 1)
+        self.assertEqual(
+            packet["repository_check"]["checked_sources"],
+            ["reference/law/rbb60.md", "reference/law/prb60.md"],
+        )
+        self.assertEqual(
+            normalize_digits(str(packet["evidence"][0]["clause_no"])),
+            "89",
+        )
+        self.assertLessEqual(len(packet["evidence"]), 3)
+
+    def test_evidence_packet_preserves_scope_gate(self):
+        packet = build_evidence_packet("งานก่อสร้างต้องประเมินผู้รับเหมาไหม")
+        self.assertEqual(packet["status"], "needs_scope_check")
+        self.assertEqual(len(packet["scope_questions"]), 3)
 
     def test_retrieve_w214_numbered_heading(self):
         result = retrieve("ว 214 หัวข้อ 1.1.2 กำหนดอะไร", limit=3)
