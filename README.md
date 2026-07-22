@@ -92,7 +92,7 @@ flowchart LR
 
 ### 🧠 Reasoning แบบพอดี
 
-ใช้การตอบตรงเมื่อเป็นการค้นคืน ใช้ analyst เมื่อมีการปรับบทกฎหมายเข้ากับข้อเท็จจริง และยกระดับเมื่อมีความขัดแย้งหรือความกำกวมที่มีนัยสำคัญ
+ใช้การตอบตรงจาก evidence packet สำหรับการค้นคืน การอธิบาย และการปรับบทกฎหมายเข้ากับข้อเท็จจริง โดยเรียก complex analyst เฉพาะเมื่อมีความขัดแย้งหรือความกำกวมที่มีนัยสำคัญ
 
 </td>
 <td>
@@ -112,11 +112,11 @@ Pasadu ใช้ root session เป็นตัวประสานงาน �
 ```text
 คำถาม
   │
-  ├─ ค้นคืน / อธิบายตรง ๆ       → route → retrieve → draft answer
+  ├─ ค้นคืน / อธิบายตรง ๆ       → evidence packet → draft answer
   │
-  ├─ ใช้กฎหมายกับข้อเท็จจริง     → route → retrieve → legal analyst → answer
+  ├─ ใช้กฎหมายกับข้อเท็จจริง     → evidence packet → root session → answer
   │
-  └─ ขัดแย้ง / กำกวม / หลายบท    → route → retrieve → complex analysis → answer
+  └─ ขัดแย้ง / กำกวม / หลายบท    → evidence packet → complex analysis → answer
                                              │
                                              └→ cite_check ก่อนส่งทุกครั้ง
 ```
@@ -209,9 +209,9 @@ npx skills add RobbyGrean/PassaduAIagent --skill pasadu -g -y
 
 - Git สำหรับ clone และอัปเดต repository
 - Codex, Claude Code หรือ Gemini CLI ตามแพลตฟอร์มที่ต้องการใช้
-- Python 3.10 ขึ้นไป หากต้องการรัน retrieval scripts, tests หรือ evaluation
+- Python 3.10 ขึ้นไป หากต้องการรัน retrieval scripts, tests หรือ evaluation ใน environment ที่ไม่มี bundled runtime
 
-> การถามตอบผ่าน skill ยังทำงานได้โดยไม่ติดตั้ง Python แต่เครื่องมือค้นคืนและชุดทดสอบจะไม่สามารถทำงานได้
+> Codex Desktop มี bundled Python runtime สำหรับ session ที่รองรับ จึงรัน retrieval scripts และ tests ได้แม้ผู้ใช้ไม่ได้ติดตั้ง Python เพิ่มเอง ส่วน CLI/agent อื่นต้องตรวจว่าเปิดใช้ Python runtime หรือมี Python 3.10+ ใน PATH; หากไม่มี ให้ใช้ skill อ่าน reference โดยตรงได้ แต่จะรัน scripts และชุดทดสอบไม่ได้
 
 ## ใช้ retrieval layer โดยตรง
 

@@ -166,7 +166,7 @@ git --version
 python --version
 ```
 
-การถามตอบผ่าน skill ยังทำงานได้หากไม่มี Python โดย agent สามารถค้นไฟล์ Markdown โดยตรง แต่ retrieval scripts จะใช้งานไม่ได้
+Codex Desktop มี bundled Python runtime สำหรับ session ที่รองรับ จึงอาจรัน retrieval scripts, eval และ tests ได้แม้ผู้ใช้ไม่ได้ติดตั้ง Python เพิ่มเอง ส่วน CLI/agent อื่นต้องตรวจว่าเปิดใช้ runtime ดังกล่าวหรือมี Python 3.10+ ใน PATH หากไม่มี Python runtime ให้ใช้ skill อ่านไฟล์ Markdown โดยตรงได้ แต่จะรัน retrieval scripts, eval และ tests ไม่ได้
 
 ---
 
@@ -624,7 +624,7 @@ Get-ChildItem "$env:USERPROFILE\.codex\skills\pasadu\reference\law"
 
 ### `python` ไม่พบ
 
-ติดตั้ง Python 3.10 ขึ้นไป หรือใช้ skill แบบค้น Markdown โดยตรงโดยไม่รัน retrieval scripts
+สำหรับ Codex Desktop ให้ตรวจว่า session เปิดใช้ bundled Python runtime หรือไม่; สำหรับ CLI/agent อื่นให้ติดตั้ง Python 3.10 ขึ้นไป หากต้องการรัน retrieval scripts, eval และ tests มิฉะนั้นให้ใช้ skill แบบค้น Markdown โดยตรงโดยไม่รันสคริปต์
 
 ### Citation ไม่ตรง
 
