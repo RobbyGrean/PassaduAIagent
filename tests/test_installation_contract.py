@@ -37,6 +37,7 @@ class InstallationContractTests(unittest.TestCase):
             REPO_ROOT / "scripts" / "install-pasadu.ps1",
             REPO_ROOT / "newbie user guide" / "prompt.txt",
             REPO_ROOT / "newbie user guide" / "update-prompt.txt",
+            REPO_ROOT / "newbie user guide" / "uninstall-prompt.txt",
         ]
         self.assertEqual([path for path in required if not path.is_file()], [])
 
@@ -60,6 +61,13 @@ class InstallationContractTests(unittest.TestCase):
         self.assertIn("ห้ามบังคับให้ติดตั้งเครื่องมือเหล่านี้", prompt)
         self.assertIn("Invoke-WebRequest", prompt)
         self.assertIn("Expand-Archive", prompt)
+        uninstall_prompt = (
+            REPO_ROOT / "newbie user guide" / "uninstall-prompt.txt"
+        ).read_text(encoding="utf-8")
+        self.assertIn(r".agents\skills\pasadu", uninstall_prompt)
+        self.assertIn("name: pasadu", uninstall_prompt)
+        self.assertIn("Move-Item", uninstall_prompt)
+        self.assertNotIn("Remove-Item", uninstall_prompt)
 
     def test_development_assets_are_not_inside_installable_skill(self):
         excluded = [

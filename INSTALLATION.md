@@ -226,7 +226,13 @@ publish a reference change without its matching index and release marker.
 
 ## Remove
 
-Remove from Codex:
+For an ordinary Windows user, give the destination AI
+[`newbie user guide/uninstall-prompt.txt`](<./newbie user guide/uninstall-prompt.txt>). It validates
+`name: pasadu`, moves the entire active root from `~/.agents/skills/pasadu` to
+`~/.pasadu-backups/pasadu-uninstalled-<timestamp>`, verifies the move, and keeps it recoverable.
+Node.js, npm, and Git are not required.
+
+For a Skills CLI installation, remove from Codex with:
 
 ```powershell
 npx.cmd --yes skills@latest remove pasadu `

@@ -197,6 +197,8 @@ staging สำเนาใหม่ และเก็บ backup ก่อนอ
 เครื่องที่มี Node.js อยู่แล้วสามารถเลือกใช้ Skills CLI ตาม [INSTALLATION.md](./INSTALLATION.md)
 สำหรับการอัปเดตกฎหมายครั้งต่อไปใช้
 [`newbie user guide/update-prompt.txt`](<./newbie user guide/update-prompt.txt>)
+และเมื่อต้องการถอนทั้ง root ของสกิลโดยไม่ใช้ Node.js ให้ใช้
+[`newbie user guide/uninstall-prompt.txt`](<./newbie user guide/uninstall-prompt.txt>)
 
 ชุดข้อมูลที่ติดตั้งมี [`data/release.json`](./skills/pasadu/data/release.json) สำหรับรายงาน
 package release และวันที่ snapshot ของ reference ทุกครั้งที่ติดตั้งหรืออัปเดต
@@ -335,6 +337,8 @@ python -B skills/pasadu/scripts/pasadu/build_index.py
 | --- | --- |
 | [`newbie user guide/เริ่มต้นใช้งาน.txt`](<./newbie user guide/เริ่มต้นใช้งาน.txt>) | ผู้ใช้ใหม่ต้องการเริ่มติดตั้งแบบสั้นที่สุด |
 | [`newbie user guide/prompt.txt`](<./newbie user guide/prompt.txt>) | ผู้ใช้ใหม่ต้องการให้ Codex ดำเนินการติดตั้งให้ |
+| [`newbie user guide/update-prompt.txt`](<./newbie user guide/update-prompt.txt>) | ต้องการให้ Codex อัปเดต reference snapshot พร้อม backup |
+| [`newbie user guide/uninstall-prompt.txt`](<./newbie user guide/uninstall-prompt.txt>) | ต้องการถอน root ของ Pasadu ออกจาก active Codex skill path |
 | [`INSTALLATION.md`](./INSTALLATION.md) | ต้องการติดตั้งหรือแก้ปัญหาแต่ละแพลตฟอร์ม |
 | [`skills/pasadu/SKILL.md`](./skills/pasadu/SKILL.md) | ต้องการเข้าใจกติกา trigger และ workflow ของ skill |
 | [`skills/pasadu/pasadu.md`](./skills/pasadu/pasadu.md) | ต้องการดู response policy และ guardrails |

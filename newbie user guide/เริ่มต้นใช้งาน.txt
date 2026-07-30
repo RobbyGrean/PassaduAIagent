@@ -78,6 +78,20 @@ npx.cmd --yes skills@latest update pasadu --global --yes
 
 ถอนการติดตั้ง
 
+วิธีแนะนำคือเปิด task ใหม่ แล้วคัดลอก uninstall-prompt.txt ไปให้ Codex
+
+Codex จะตรวจว่า root เป็น Pasadu ก่อน แล้ว move ทั้งโฟลเดอร์:
+
+%USERPROFILE%\.agents\skills\pasadu
+
+ออกจาก active skill path ไปเก็บใน:
+
+%USERPROFILE%\.pasadu-backups
+
+วิธีนี้ไม่ต้องมี Node.js, npm หรือ Git และสามารถกู้คืนได้
+
+ถ้าเครื่องมี Node.js และติดตั้งผ่าน Skills CLI สามารถใช้:
+
 npx.cmd --yes skills@latest remove pasadu --global --agent codex --yes
 
 ข้อควรรู้

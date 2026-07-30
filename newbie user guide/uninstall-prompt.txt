@@ -1,0 +1,39 @@
+คุณกำลังทำหน้าที่ถอนการติดตั้ง Pasadu standalone skill แบบ global จาก Codex บน Windows
+
+เป้าหมายคือถอน root ของ Pasadu ทั้งโฟลเดอร์ออกจาก active Codex skill path
+โดยไม่ต้องมี Node.js, npm หรือ Git และต้องสามารถกู้คืนได้
+
+ให้ดำเนินการดังนี้:
+
+1. กำหนด source path:
+   %USERPROFILE%\.agents\skills\pasadu
+2. ถ้า source path ไม่มีอยู่ ให้ตอบ `PASADU_NOT_INSTALLED` และหยุด
+3. อ่าน `%USERPROFILE%\.agents\skills\pasadu\SKILL.md`
+4. ยืนยันว่า YAML frontmatter มี `name: pasadu`
+   - ถ้ายืนยันไม่ได้ ห้ามย้าย ห้ามลบ และให้รายงานปัญหา
+5. ขอสิทธิ์ผู้ใช้ก่อนเขียน user-level directory ตามระบบ
+6. ถอนทั้ง root ด้วย PowerShell ตามลำดับ:
+
+   $sourcePath = Join-Path $env:USERPROFILE ".agents\skills\pasadu"
+   $backupRoot = Join-Path $env:USERPROFILE ".pasadu-backups"
+   $timestamp = Get-Date -Format "yyyyMMdd-HHmmss-fff"
+   $backupPath = Join-Path $backupRoot "pasadu-uninstalled-$timestamp"
+   New-Item -ItemType Directory -Force -Path $backupRoot | Out-Null
+   Move-Item -LiteralPath $sourcePath -Destination $backupPath
+
+7. ตรวจว่า:
+   - source path ไม่มีอยู่แล้ว
+   - backup path มี `SKILL.md`, `pasadu.md`, `reference`, `scripts` และ `data`
+8. ห้ามลบ backup ถาวรใน task นี้
+9. หลัง verification ผ่านเท่านั้น ให้ตอบบรรทัดแรกว่า:
+
+PASADU_UNINSTALLED
+
+จากนั้นรายงาน:
+
+- active path ที่ถูกถอน
+- backup path สำหรับกู้คืน
+- แจ้งให้ปิดและเปิด Codex ใหม่
+
+ถ้า installation เป็น junction หรือ symbolic link ให้ถอนเฉพาะ link ที่ active path
+และรายงานว่า source repository ภายนอกยังคงอยู่
