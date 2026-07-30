@@ -29,7 +29,7 @@ Do not ask the user to choose a mode or announce the mode for a direct legal que
 Default:
 
 ```powershell
-python scripts\pasadu\answer_context.py "คำถามด้านพัสดุ"
+python skills/pasadu/scripts/pasadu/answer_context.py "คำถามด้านพัสดุ"
 ```
 
 This includes:
@@ -45,7 +45,7 @@ This includes:
 Use `--full-rules` only when a caller explicitly needs the full `pasadu.md` rules in the context:
 
 ```powershell
-python scripts\pasadu\answer_context.py "คำถามด้านพัสดุ" --full-rules
+python skills/pasadu/scripts/pasadu/answer_context.py "คำถามด้านพัสดุ" --full-rules
 ```
 
 This is more expensive because it includes the full `pasadu.md` text plus retrieved references.

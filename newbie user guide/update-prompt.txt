@@ -1,0 +1,46 @@
+คุณกำลังทำหน้าที่อัปเดต Pasadu standalone skill แบบ global สำหรับ Codex บน Windows
+
+เป้าหมายคืออัปเดตไฟล์กฎหมาย reference, index, scripts และ SKILL.md จาก repository ทางการ
+พร้อมตรวจสอบผลจริง ห้ามเพียงแสดงคำสั่งให้ฉันทำเอง
+
+ให้ดำเนินการดังนี้:
+
+1. อ่าน INSTALLATION.md ล่าสุด:
+   https://github.com/RobbyGrean/PassaduAIagent/blob/main/INSTALLATION.md
+2. ตรวจปลายทาง:
+   %USERPROFILE%\.agents\skills\pasadu
+3. อ่าน SKILL.md และยืนยันว่ามี `name: pasadu`
+   - ถ้ายืนยันไม่ได้ ห้ามลบหรือเขียนทับ ให้หยุดและรายงาน
+4. ผู้ใช้ไม่จำเป็นต้องมี Node.js, npm หรือ Git ห้ามบังคับให้ติดตั้งเครื่องมือเหล่านี้
+5. ใช้ AI-managed update:
+   - รันลำดับ PowerShell นี้ทีละขั้นและตรวจ exit status:
+
+     $workPath = Join-Path $env:TEMP ("pasadu-update-" + [guid]::NewGuid().ToString("N"))
+     $zipPath = Join-Path $workPath "pasadu.zip"
+     New-Item -ItemType Directory -Path $workPath | Out-Null
+     Invoke-WebRequest -Uri "https://github.com/RobbyGrean/PassaduAIagent/archive/refs/heads/main.zip" -OutFile $zipPath
+     Expand-Archive -LiteralPath $zipPath -DestinationPath $workPath
+     $repoPath = Join-Path $workPath "PassaduAIagent-main"
+     $installerPath = Join-Path $repoPath "scripts\install-pasadu.ps1"
+     Get-Content $installerPath
+     powershell -NoProfile -ExecutionPolicy Bypass -File $installerPath -Agent codex
+
+   - สคริปต์ต้องสร้าง backup ของ installation เดิมก่อนสลับไฟล์
+   - ห้าม pipe สคริปต์จากอินเทอร์เน็ตเข้า shell โดยตรง
+6. ตรวจว่าไฟล์ต่อไปนี้มีอยู่:
+   - SKILL.md
+   - pasadu.md
+   - reference\law\prb60.md
+   - reference\law\rbb60.md
+   - reference\law\rbb60-3.md
+   - scripts\pasadu\evidence_packet.py
+   - data\index\chunks.json
+   - data\release.json
+7. ถ้ามี Python ให้รัน smoke test จากโฟลเดอร์ skill:
+   python scripts/pasadu/evidence_packet.py "วิธีเฉพาะเจาะจงใช้ได้ในกรณีใด" --limit 3
+8. อ่าน `data\release.json` แล้วรายงาน package_release และ reference_snapshot_date
+9. รายงานช่องทางที่ใช้, ตำแหน่งติดตั้ง, backup path ถ้ามี และผล verification
+10. ตอบบรรทัดแรกว่า `PASADU_UPDATED` เฉพาะเมื่อ verification ผ่านทั้งหมด
+
+ห้ามแก้ไขกฎหมายหรือ index เพื่อบังคับให้ verification ผ่าน
+ห้ามลบ backup อัตโนมัติ

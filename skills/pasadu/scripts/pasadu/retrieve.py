@@ -140,6 +140,12 @@ def score_chunk(
     source = chunk.get("source")
     clause_no = normalize_digits(str(chunk.get("clause_no", "")))
     if source == "reference/law/ministerial-regulations/mr-specific-2560.md":
+        if (
+            any(normalize_search_text(keyword) in query_joined for keyword in ["เฉพาะเจาะจง", "เจาะจง"])
+            and any(normalize_search_text(keyword) in query_joined for keyword in ["กรณีใด", "ใช้ได้", "วงเงิน"])
+            and clause_no == "1"
+        ):
+            score += 20.0
         if normalize_search_text("ไม่ทำข้อตกลงเป็นหนังสือ") in query_joined and clause_no == "4":
             score += 20.0
         if any(normalize_search_text(keyword) in query_joined for keyword in ["กรรมการตรวจรับคนเดียว", "ผู้ตรวจรับพัสดุคนเดียว"]) and clause_no == "5":

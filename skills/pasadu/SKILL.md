@@ -112,8 +112,8 @@ Use both files when the question needs both the Act's authority and the Regulati
    - ตอบตามตัวบทเท่านั้น
    - ตอบเชิงปฏิบัติโดยอ้างคู่มือ/แนววินิจฉัยประกอบ
 5. Confirm the packet checked the routed primary and fallback sources and identified the exact section or clause.
-6. Answer direct, procedural, and ordinary conditional questions in the main conversation.
-7. Use one complex specialist only for material conflict, unresolved ambiguity, multi-provision reconciliation, or a difficult fact-to-law chain.
+6. Answer direct, procedural, ordinary conditional, and complex questions in the current conversation.
+7. For material conflicts, unresolved ambiguity, multi-provision reconciliation, or a difficult fact-to-law chain, reason from the bounded evidence packet in the current conversation. Do not require a custom subagent.
 8. If the repository result is `partial` or `not_found` after primary and fallback retrieval, and no missing-fact question must be answered first, the main conversation may enter the web search fallback described below.
 9. Ask concise clarification questions if facts are missing; do not use web search to fill missing facts.
 10. State uncertainty when the reference does not fully answer the question.
@@ -125,7 +125,7 @@ For direct questions such as "มาตรา 56 คืออะไร", "ข้
 - Do not invent law.
 - Do not cite a section or clause that was not found.
 - Do not silently rely on outside legal sources. Web search is allowed only as the explicit fallback after repository routing, primary retrieval, and configured fallback retrieval are complete.
-- Retrieval and ordinary analysis stay in the main conversation. The optional `legal_analyst_complex` specialist must never browse the web; only the main conversation may run the fallback search.
+- Keep retrieval and analysis in the current conversation. This standalone skill does not require custom subagents or platform-specific agent configuration.
 - If the repository supports only part of an answer, separate `Repository source` and `Web source` sections and keep citations visibly distinct.
 - Every answer using web search must begin with exactly: `คำตอบนี้ใช้ข้อมูลจาก web search ไม่ได้ใช้ฐานข้อมูลของ repository ข้อมูลมีโอกาสคลาดเคลื่อน โปรดตรวจสอบกับแหล่งทางการอีกครั้ง`
 - For each web source, show the owning website or agency, direct URL, access date when available, the verified title of the Act, Regulation, ministerial regulation, circular, or announcement, and the verified section, clause, heading, or document number. Label it `web source`.
@@ -201,7 +201,7 @@ Do not block or add a mode announcement to direct legal questions. Use `full rul
 For script usage:
 
 ```powershell
-python scripts\pasadu\evidence_packet.py "question" --limit 3
-python scripts\pasadu\answer_context.py "question"
-python scripts\pasadu\answer_context.py "question" --full-rules
+python scripts/pasadu/evidence_packet.py "question" --limit 3
+python scripts/pasadu/answer_context.py "question"
+python scripts/pasadu/answer_context.py "question" --full-rules
 ```

@@ -1,0 +1,98 @@
+name: Standalone skill contract
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ["3.10", "3.12"]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Run Python tests
+        run: python -m unittest discover -s tests -v
+
+      - name: Smoke-test source skill
+        run: >-
+          python skills/pasadu/scripts/pasadu/evidence_packet.py
+          "วิธีเฉพาะเจาะจงใช้ได้ในกรณีใด"
+          --limit 3
+
+      - name: Test AI-managed copy and update fallback (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $destination = Join-Path $env:RUNNER_TEMP "pasadu"
+          powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/install-pasadu.ps1 -Agent codex -Destination $destination
+          python tests/verify_installed_skill.py $destination
+          powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/install-pasadu.ps1 -Agent codex -Destination $destination
+          python tests/verify_installed_skill.py $destination
+          $backup = Get-ChildItem -Directory "$destination.backup.*"
+          if ($backup.Count -ne 1) { throw "Expected exactly one Pasadu backup." }
+
+      - name: Discover and install globally with Skills CLI (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          npx.cmd --yes skills@1.5.21 add . --list
+          npx.cmd --yes skills@1.5.21 add . --skill pasadu --agent codex claude-code --global --copy --yes
+          python tests/verify_installed_skill.py "$HOME/.agents/skills/pasadu"
+          python tests/verify_installed_skill.py "$HOME/.claude/skills/pasadu"
+          npx.cmd --yes skills@1.5.21 list --global --json
+          npx.cmd --yes skills@1.5.21 remove pasadu --global --agent codex claude-code --yes
+
+      - name: Discover and install globally with Skills CLI (Linux)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          npx --yes skills@1.5.21 add . --list
+          npx --yes skills@1.5.21 add . --skill pasadu --agent codex claude-code --global --copy --yes
+          python tests/verify_installed_skill.py "$HOME/.agents/skills/pasadu"
+          python tests/verify_installed_skill.py "$HOME/.claude/skills/pasadu"
+          npx --yes skills@1.5.21 list --global --json
+          npx --yes skills@1.5.21 remove pasadu --global --agent codex claude-code --yes
+
+      - name: Verify GitHub-sourced update channel after release
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          npx.cmd --yes skills@1.5.21 add RobbyGrean/PassaduAIagent --skill pasadu --agent codex --global --copy --yes
+          $skills = npx.cmd --yes skills@1.5.21 list --global --json | ConvertFrom-Json
+          $pasadu = @($skills) | Where-Object { $_.name -eq "pasadu" }
+          if ($pasadu.Count -ne 1) { throw "Expected one global Pasadu skill." }
+          if ($pasadu[0].sourceType -ne "github") { throw "Pasadu is missing GitHub update metadata." }
+          $updateOutput = npx.cmd --yes skills@1.5.21 update pasadu --global --yes 2>&1
+          $updateExitCode = $LASTEXITCODE
+          $updateOutput | Write-Output
+          if ($updateExitCode -ne 0) { throw "Skills CLI update failed with exit code $updateExitCode." }
+          if ($updateOutput -match "No installed skills found matching") { throw "Skills CLI did not find Pasadu to update." }
+          python tests/verify_installed_skill.py "$HOME/.agents/skills/pasadu"
+          npx.cmd --yes skills@1.5.21 remove pasadu --global --agent codex --yes
+
+          $zipWork = Join-Path $env:RUNNER_TEMP "pasadu-release-zip"
+          $zipPath = Join-Path $zipWork "pasadu.zip"
+          New-Item -ItemType Directory -Path $zipWork | Out-Null
+          Invoke-WebRequest -Uri "https://github.com/RobbyGrean/PassaduAIagent/archive/refs/heads/main.zip" -OutFile $zipPath
+          Expand-Archive -LiteralPath $zipPath -DestinationPath $zipWork
+          $zipRepository = Join-Path $zipWork "PassaduAIagent-main"
+          $zipDestination = Join-Path $env:RUNNER_TEMP "pasadu"
+          powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$zipRepository/scripts/install-pasadu.ps1" -Agent codex -Destination $zipDestination
+          python tests/verify_installed_skill.py $zipDestination

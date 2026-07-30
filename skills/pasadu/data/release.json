@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "package_release": "2026.07.30",
+  "reference_snapshot_date": "2026-07-30",
+  "source_repository": "https://github.com/RobbyGrean/PassaduAIagent",
+  "source_path": "skills/pasadu",
+  "coverage_note": "This date identifies the bundled reference snapshot; it is not a claim that every Thai procurement authority is included."
+}

@@ -1,8 +1,0 @@
-# Keep the root/input session unpinned so it inherits the model and reasoning
-# settings selected by the user or Codex. Only the optional complex specialist
-# pins a model; routine retrieval and reasoning stay in the root session.
-
-[agents]
-max_threads = 4
-max_depth = 1
-interrupt_message = true

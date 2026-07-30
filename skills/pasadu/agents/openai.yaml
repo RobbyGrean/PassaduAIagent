@@ -1,0 +1,7 @@
+interface:
+  display_name: "Pasadu"
+  short_description: "Thai procurement law with verified citations"
+  default_prompt: "Use $pasadu to answer this Thai government procurement question with verified legal citations."
+
+policy:
+  allow_implicit_invocation: true

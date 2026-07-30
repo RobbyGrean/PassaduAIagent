@@ -4,7 +4,8 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SCRIPT_DIR = ROOT / "scripts" / "pasadu"
+SKILL_ROOT = ROOT / "skills" / "pasadu"
+SCRIPT_DIR = SKILL_ROOT / "scripts" / "pasadu"
 sys.path.insert(0, str(SCRIPT_DIR))
 
 from build_index import build_index
@@ -299,6 +300,13 @@ class PasaduScriptTests(unittest.TestCase):
         result = retrieve("วิธีเฉพาะเจาะจงใช้กรณีใด", limit=5)
         self.assertEqual(result["results"][0]["source"], "reference/law/prb60.md")
         self.assertEqual(str(result["results"][0]["clause_no"]), "56")
+        ministerial = [
+            item
+            for item in result["results"]
+            if item["source"] == "reference/law/ministerial-regulations/mr-specific-2560.md"
+        ]
+        self.assertTrue(ministerial)
+        self.assertEqual(ministerial[0]["clause_no"], "1")
 
     def test_retrieve_non_appealable_issue_prioritizes_ministerial_clause_three(self):
         result = retrieve("เรื่องที่อุทธรณ์ไม่ได้ตามกฎกระทรวงอุทธรณ์", limit=3)

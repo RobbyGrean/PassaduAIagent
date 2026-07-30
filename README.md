@@ -8,8 +8,8 @@
 
 <p>
   <a href="./INSTALLATION.md">ติดตั้ง</a> ·
-  <a href="./SKILL.md">ดู Skill</a> ·
-  <a href="./pasadu.md">ดู Response Policy</a> ·
+  <a href="./skills/pasadu/SKILL.md">ดู Skill</a> ·
+  <a href="./skills/pasadu/pasadu.md">ดู Response Policy</a> ·
   <a href="./docs/pasadu-agent-usage.md">คู่มือการใช้งาน</a>
 </p>
 
@@ -92,7 +92,7 @@ flowchart LR
 
 ### 🧠 Reasoning แบบพอดี
 
-ใช้การตอบตรงจาก evidence packet สำหรับการค้นคืน การอธิบาย และการปรับบทกฎหมายเข้ากับข้อเท็จจริง โดยเรียก complex analyst เฉพาะเมื่อมีความขัดแย้งหรือความกำกวมที่มีนัยสำคัญ
+ใช้ evidence packet ชุดเดียวสำหรับการค้นคืน การอธิบาย และการปรับบทกฎหมายเข้ากับข้อเท็จจริง หากมีความขัดแย้งหรือความกำกวมที่มีนัยสำคัญ ให้วิเคราะห์ต่อในบทสนทนาปัจจุบัน
 
 </td>
 <td>
@@ -107,14 +107,14 @@ flowchart LR
 
 ## Workflow การตอบคำถาม
 
-Pasadu ใช้ root session เป็นตัวประสานงาน และเลือกเส้นทางที่เหมาะกับลักษณะคำถาม:
+Pasadu ใช้บทสนทนาปัจจุบันเป็นตัวประสานงาน และเลือกเส้นทางที่เหมาะกับลักษณะคำถาม:
 
 ```text
 คำถาม
   │
   ├─ ค้นคืน / อธิบายตรง ๆ       → evidence packet → draft answer
   │
-  ├─ ใช้กฎหมายกับข้อเท็จจริง     → evidence packet → root session → answer
+  ├─ ใช้กฎหมายกับข้อเท็จจริง     → evidence packet → current conversation → answer
   │
   └─ ขัดแย้ง / กำกวม / หลายบท    → evidence packet → complex analysis → answer
                                              │
@@ -126,15 +126,15 @@ Pasadu ใช้ root session เป็นตัวประสานงาน �
 | สถานการณ์ | เส้นทางที่ใช้ | ผลลัพธ์ที่คาดหวัง |
 | --- | --- | --- |
 | ต้องการมาตรา ข้อ หรือขั้นตอนที่ระบุชัด | Direct retrieval | สรุปจาก evidence packet พร้อม citation |
-| ต้องวิเคราะห์ว่ากฎหมายใช้กับกรณีนี้อย่างไร | Root session + evidence packet | แยกหลักกฎหมาย ข้อเท็จจริง เงื่อนไข และข้อสรุปโดยไม่ส่งต่องาน |
-| มีหลายบทต้องอ่านประกอบกัน หรือมีความกำกวมสำคัญ | Complex analyst | อธิบายจุดขัดแย้ง สมมติฐาน และความไม่แน่นอนอย่างชัดเจน |
+| ต้องวิเคราะห์ว่ากฎหมายใช้กับกรณีนี้อย่างไร | บทสนทนาปัจจุบัน + evidence packet | แยกหลักกฎหมาย ข้อเท็จจริง เงื่อนไข และข้อสรุปโดยไม่ส่งต่องาน |
+| มีหลายบทต้องอ่านประกอบกัน หรือมีความกำกวมสำคัญ | วิเคราะห์ต่อในบทสนทนาปัจจุบัน | อธิบายจุดขัดแย้ง สมมติฐาน และความไม่แน่นอนอย่างชัดเจน |
 | ค้นแล้วไม่มีหลักฐานเพียงพอ | Safe failure | แจ้งข้อมูลที่ขาด โดยไม่แต่งคำตอบขึ้นเอง |
 
 ## Repository-first และ web search fallback
 
 Pasadu ต้อง route และค้นจาก repository ก่อนเสมอ โดยตรวจ source หลักและ fallback source ที่กำหนดไว้ใน routing policy ให้ครบ หาก repository มีหลักฐานเพียงพอ ให้ตอบจาก repository และไม่เพิ่ม web source
 
-Web search ใช้ได้เฉพาะเมื่อค้น repository ตามปกติแล้ว ตรวจ primary/fallback ครบแล้ว และหลักฐานยังไม่พอหรือไม่มีเอกสารที่เกี่ยวข้อง หากข้อเท็จจริงยังขาดจนต้องถามผู้ใช้ ให้ถามก่อนและยังไม่ใช้ web search การ fallback นี้เป็นการค้นแบบอ่านอย่างเดียวโดยบทสนทนาหลัก; complex specialist ไม่ค้นเว็บเอง
+Web search ใช้ได้เฉพาะเมื่อค้น repository ตามปกติแล้ว ตรวจ primary/fallback ครบแล้ว และหลักฐานยังไม่พอหรือไม่มีเอกสารที่เกี่ยวข้อง หากข้อเท็จจริงยังขาดจนต้องถามผู้ใช้ ให้ถามก่อนและยังไม่ใช้ web search การ fallback นี้เป็นการค้นแบบอ่านอย่างเดียวในบทสนทนาปัจจุบัน
 
 ถ้า repository ตอบได้เพียงบางส่วน ต้องแบ่งคำตอบเป็น `Repository source` และ `Web source` ห้ามผสม citation หรือทำให้ web source ดูเหมือนเป็นเอกสารใน repository
 
@@ -146,18 +146,9 @@ Web search ใช้ได้เฉพาะเมื่อค้น repository 
 
 หาก web sources ขัดแย้งกัน ต้องแสดงทั้งสองแหล่งและอธิบายความขัดแย้ง คำถามที่กระทบสิทธิ หน้าที่ งบประมาณ สัญญา หรือความรับผิด ต้องเตือนให้ตรวจต้นฉบับทางการและหน่วยงานผู้มีอำนาจอีกครั้ง
 
-### การตั้งค่าโมเดล
+### สถาปัตยกรรม standalone
 
-สำหรับ Codex ค่าโมเดลของแต่ละช่วงทำงานเป็นดังนี้:
-
-| ช่วงทำงาน | โมเดล | เหตุผลการตั้งค่า |
-| --- | --- | --- |
-| รับคำถาม / root session | `inherit` | ใช้โมเดลและ reasoning ที่ผู้ใช้หรือ Codex เลือกไว้ |
-| Evidence retrieval | Python / deterministic | ค้น primary และ fallback ใน process เดียว ไม่มี model call |
-| การวิเคราะห์ทั่วไป | root session | ใช้ evidence packet ในบทสนทนาเดิมและ reuse หลักฐานใน follow-up |
-| `legal_analyst_complex` | `gpt-5.6-luna` / high | วิเคราะห์ความขัดแย้ง ความกำกวม และหลายบทบัญญัติ |
-
-ค่าดังกล่าวกำหนดใน [`.codex/config.toml`](./.codex/config.toml) และ [`.codex/agents/`](./.codex/agents/)
+Pasadu ไม่ pin โมเดลและไม่พึ่ง custom subagent จึงใช้โมเดลและ reasoning ที่ผู้ใช้เลือกใน host ปัจจุบัน งาน retrieval ใช้ Python แบบ deterministic ส่วนการวิเคราะห์ทั้งหมดอยู่ในบทสนทนาปัจจุบัน
 
 > **หมายเหตุ:** Phase 1 ใช้ข้อมูลจาก repository เป็นหลัก และเป็น workflow แบบอ่านอย่างเดียว (read-only) โดยมี web search fallback แบบติดป้ายชัดเจนเมื่อหลักฐานใน repository ไม่พอ
 
@@ -165,13 +156,11 @@ Web search ใช้ได้เฉพาะเมื่อค้น repository 
 
 สำหรับผู้ใช้ใหม่ที่ไม่ต้องการอ่านรายละเอียดทางเทคนิค ให้เริ่มที่ [เริ่มต้นใช้งาน.txt](<./newbie user guide/เริ่มต้นใช้งาน.txt>) แล้วคัดลอก [prompt.txt](<./newbie user guide/prompt.txt>) ไปสั่ง Codex ได้เลย ส่วน `INSTALLATION.md` เป็นคู่มือปฏิบัติการที่ Codex จะอ่านและทำตามให้
 
-### 1. ติดตั้งบน Codex สำหรับ Windows
+### 1. ติดตั้ง global บน Codex สำหรับ Windows
 
-เปิด PowerShell แล้วรัน:
-```powershell
-New-Item -ItemType Directory -Force "$env:USERPROFILE\.codex\skills" | Out-Null
-git clone https://github.com/RobbyGrean/PassaduAIagent.git "$env:USERPROFILE\.codex\skills\pasadu"
-```
+ผู้ใช้ทั่วไปไม่ต้องติดตั้ง Node.js, npm หรือ Git ให้เปิด task ใหม่แล้วคัดลอก
+[`newbie user guide/prompt.txt`](<./newbie user guide/prompt.txt>) ไปให้ Codex ดำเนินการดาวน์โหลด
+ZIP, ติดตั้ง global และตรวจไฟล์ให้จนจบ
 
 จากนั้นปิด–เปิด Codex หรือเริ่ม task ใหม่ แล้วถามได้ทันที เช่น:
 
@@ -191,36 +180,45 @@ $pasadu มาตรา 56 ใช้กรณีใด
 
 ## ติดตั้ง
 
-คู่มือติดตั้งฉบับเต็มครอบคลุม Codex Windows App, Codex CLI, ChatGPT Work, Gemini CLI และ Claude Code:
+คู่มือติดตั้งฉบับเต็มครอบคลุม Codex Windows App, Codex CLI, Claude Code, Gemini CLI และข้อจำกัดของ web-only hosts:
 
 ➡️ **[อ่าน INSTALLATION.md](./INSTALLATION.md)**
 
-### ติดตั้งด้วย Skills CLI (แนะนำ)
+### ให้ Codex ติดตั้งแทน (แนะนำ)
 
-ตรวจสอบแล้วว่า Skills CLI พบ root skill ชื่อ `pasadu` และติดตั้งแบบ copy ทั้งโฟลเดอร์ประกอบของ repository ได้ ให้รันแบบ global/non-interactive:
+คัดลอก [`newbie user guide/prompt.txt`](<./newbie user guide/prompt.txt>) ไปให้ Codex ปลายทาง
+วิธีนี้ใช้ HTTPS และ PowerShell ที่มีใน Windows ไม่ต้องมี Node.js, npm หรือ Git
 
-```powershell
-npx skills add RobbyGrean/PassaduAIagent --skill pasadu -g -y
-```
+Codex จะใช้ [`scripts/install-pasadu.ps1`](./scripts/install-pasadu.ps1) เพื่อตรวจ source,
+staging สำเนาใหม่ และเก็บ backup ก่อนอัปเดต
 
-คำสั่งนี้ติดตั้ง `SKILL.md` พร้อม `pasadu.md`, `reference/`, `scripts/`, `data/`, `evals/`, `tests/` และไฟล์ตั้งค่าที่ skill ใช้ ไม่ใช่คัดลอกเฉพาะไฟล์เดียว
+ตำแหน่ง Codex global คือ `%USERPROFILE%\.agents\skills\pasadu` ดูคำสั่งสำหรับ Claude Code, Gemini CLI, update, remove และ Git-managed fallback ใน [INSTALLATION.md](./INSTALLATION.md)
+
+เครื่องที่มี Node.js อยู่แล้วสามารถเลือกใช้ Skills CLI ตาม [INSTALLATION.md](./INSTALLATION.md)
+สำหรับการอัปเดตกฎหมายครั้งต่อไปใช้
+[`newbie user guide/update-prompt.txt`](<./newbie user guide/update-prompt.txt>)
+
+ชุดข้อมูลที่ติดตั้งมี [`data/release.json`](./skills/pasadu/data/release.json) สำหรับรายงาน
+package release และวันที่ snapshot ของ reference ทุกครั้งที่ติดตั้งหรืออัปเดต
 
 ### ข้อกำหนดขั้นต่ำ
 
-- Git สำหรับ clone และอัปเดต repository
 - Codex, Claude Code หรือ Gemini CLI ตามแพลตฟอร์มที่ต้องการใช้
+- อินเทอร์เน็ตและสิทธิ์เขียน user-level skill directory
+- Node.js/npm ต้องใช้เฉพาะเมื่อเลือกช่องทาง Skills CLI
+- Git ต้องใช้เฉพาะเมื่อเลือก Git-managed installation
 - Python 3.10 ขึ้นไป หากต้องการรัน retrieval scripts, tests หรือ evaluation ใน environment ที่ไม่มี bundled runtime
 
 > Codex Desktop มี bundled Python runtime สำหรับ session ที่รองรับ จึงรัน retrieval scripts และ tests ได้แม้ผู้ใช้ไม่ได้ติดตั้ง Python เพิ่มเอง ส่วน CLI/agent อื่นต้องตรวจว่าเปิดใช้ Python runtime หรือมี Python 3.10+ ใน PATH; หากไม่มี ให้ใช้ skill อ่าน reference โดยตรงได้ แต่จะรัน scripts และชุดทดสอบไม่ได้
 
 ## ใช้ retrieval layer โดยตรง
 
-สคริปต์ทั้งหมดอยู่ใน [`scripts/pasadu/`](./scripts/pasadu/) และใช้ index ที่อยู่ใน [`data/index/`](./data/index/)
+สคริปต์ทั้งหมดอยู่ใน [`skills/pasadu/scripts/pasadu/`](./skills/pasadu/scripts/pasadu/) และใช้ index ที่อยู่ใน [`skills/pasadu/data/index/`](./skills/pasadu/data/index/)
 
 ### Route คำถามไปยังแหล่งอ้างอิง
 
 ```powershell
-python -B scripts/pasadu/route_query.py "มาตรา 56 ใช้กรณีใด"
+python -B skills/pasadu/scripts/pasadu/route_query.py "มาตรา 56 ใช้กรณีใด"
 ```
 
 เพิ่ม `--json` หากต้องการผลลัพธ์สำหรับนำไปใช้งานต่อในระบบอื่น
@@ -228,41 +226,41 @@ python -B scripts/pasadu/route_query.py "มาตรา 56 ใช้กรณ�
 ### ค้นคืนหลักฐานที่เกี่ยวข้อง
 
 ```powershell
-python -B scripts/pasadu/retrieve.py "หน้าที่ของคณะกรรมการตรวจรับพัสดุ" --limit 5
+python -B skills/pasadu/scripts/pasadu/retrieve.py "หน้าที่ของคณะกรรมการตรวจรับพัสดุ" --limit 5
 ```
 
 ### สร้าง context สำหรับผู้ช่วย AI
 
 ```powershell
-python -B scripts/pasadu/answer_context.py "การอุทธรณ์ผลการจัดซื้อจัดจ้างทำได้อย่างไร" --limit 5
+python -B skills/pasadu/scripts/pasadu/answer_context.py "การอุทธรณ์ผลการจัดซื้อจัดจ้างทำได้อย่างไร" --limit 5
 ```
 
 ### ตรวจ citation ของคำตอบ
 
 ```powershell
-python -B scripts/pasadu/cite_check.py --text "คำตอบที่มี citation อยู่ในข้อความ"
+python -B skills/pasadu/scripts/pasadu/cite_check.py --text "คำตอบที่มี citation อยู่ในข้อความ"
 ```
 
 หรืออ่านคำตอบจากไฟล์ UTF-8:
 
 ```powershell
-python -B scripts/pasadu/cite_check.py --file answer.txt
+python -B skills/pasadu/scripts/pasadu/cite_check.py --file answer.txt
 ```
 
 ## โครงสร้าง repository
 
 ```text
 PassaduAIagent/
-├── SKILL.md                    # trigger และ workflow หลักของ skill
-├── pasadu.md                   # persona, policy และรูปแบบคำตอบ
-├── AGENTS.md                   # กติกาการประสานงานของ Phase 1
+├── skills/pasadu/              # standalone skill ที่ Skills CLI ติดตั้ง
+│   ├── SKILL.md                # trigger และ workflow หลัก
+│   ├── pasadu.md               # policy และรูปแบบคำตอบ
+│   ├── agents/openai.yaml      # metadata สำหรับ UI
+│   ├── reference/              # กฎหมาย กฎกระทรวง และหนังสือเวียน
+│   ├── data/index/             # ดัชนี routing/retrieval
+│   └── scripts/pasadu/         # retrieval และ citation tools
+├── AGENTS.md                   # กติกาสำหรับพัฒนา repository
 ├── INSTALLATION.md             # คู่มือติดตั้งทุกแพลตฟอร์ม
-├── reference/                  # คลังเอกสารอ้างอิง
-│   ├── law/                    # พ.ร.บ., ระเบียบ และกฎกระทรวง
-│   ├── circulars/              # หนังสือเวียน
-│   └── ECPP/                   # เอกสารประกอบ e-Catalog / e-CPP
-├── data/index/                 # ดัชนีสำหรับ routing และ retrieval
-├── scripts/pasadu/             # เครื่องมือค้นคืนและตรวจ citation
+├── reference/ECPP/             # เอกสารประกอบที่ยังไม่อยู่ใน runtime routing
 ├── evals/                      # คำถามและ citation ที่คาดหวัง
 ├── tests/                      # ชุดทดสอบสคริปต์
 ├── docs/                       # คู่มือ การออกแบบ และ roadmap
@@ -314,13 +312,13 @@ python -B -m unittest discover -s tests
 ### รัน evaluation queries
 
 ```powershell
-python -B scripts/pasadu/eval_queries.py
+python -B skills/pasadu/scripts/pasadu/eval_queries.py
 ```
 
 ### สร้าง index ใหม่
 
 ```powershell
-python -B scripts/pasadu/build_index.py
+python -B skills/pasadu/scripts/pasadu/build_index.py
 ```
 
 ก่อนส่งการเปลี่ยนแปลงควรตรวจอย่างน้อย:
@@ -338,8 +336,8 @@ python -B scripts/pasadu/build_index.py
 | [`newbie user guide/เริ่มต้นใช้งาน.txt`](<./newbie user guide/เริ่มต้นใช้งาน.txt>) | ผู้ใช้ใหม่ต้องการเริ่มติดตั้งแบบสั้นที่สุด |
 | [`newbie user guide/prompt.txt`](<./newbie user guide/prompt.txt>) | ผู้ใช้ใหม่ต้องการให้ Codex ดำเนินการติดตั้งให้ |
 | [`INSTALLATION.md`](./INSTALLATION.md) | ต้องการติดตั้งหรือแก้ปัญหาแต่ละแพลตฟอร์ม |
-| [`SKILL.md`](./SKILL.md) | ต้องการเข้าใจกติกา trigger และ workflow ของ skill |
-| [`pasadu.md`](./pasadu.md) | ต้องการดู persona, response policy และ guardrails |
+| [`skills/pasadu/SKILL.md`](./skills/pasadu/SKILL.md) | ต้องการเข้าใจกติกา trigger และ workflow ของ skill |
+| [`skills/pasadu/pasadu.md`](./skills/pasadu/pasadu.md) | ต้องการดู response policy และ guardrails |
 | [`docs/pasadu-agent-usage.md`](./docs/pasadu-agent-usage.md) | ต้องการดูสถานะปัจจุบันและ roadmap |
 | [`docs/token-usage.md`](./docs/token-usage.md) | ต้องการเข้าใจการใช้ context และ token |
 | [`how2agent/index.html`](./how2agent/index.html) | ต้องการคู่มือเริ่มต้นใช้งานแบบภาพ |

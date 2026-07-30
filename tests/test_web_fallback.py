@@ -4,7 +4,8 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SCRIPT_DIR = ROOT / "scripts" / "pasadu"
+SKILL_ROOT = ROOT / "skills" / "pasadu"
+SCRIPT_DIR = SKILL_ROOT / "scripts" / "pasadu"
 sys.path.insert(0, str(SCRIPT_DIR))
 
 from web_fallback import (  # noqa: E402
